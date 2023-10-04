@@ -34,12 +34,12 @@ services:
       ./manage.py makemigrations && 
       ./manage.py migrate && 
       ./manage.py initadmin && 
-      gunicorn -b 0.0.0.0:8000 project.wsgi:application"
+      gunicorn -b 0.0.0.0:8000 app.wsgi:application"
 
   nginx:
     build:
       dockerfile: ./Dockerfile
-      context: ./docker/nginx/
+      context: ./.docker/nginx/
     container_name: nginx
     volumes:
       - static_volume:/app/static
