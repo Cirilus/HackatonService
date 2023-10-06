@@ -20,6 +20,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework_simplejwt.views import TokenVerifyView, TokenObtainPairView, TokenRefreshView
+from Hackaton.views import HackatonUserView, MyTeamListView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,6 +32,11 @@ urlpatterns = [
     path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+    path('api/v1/hackaton/user_registration/', HackatonUserView.as_view(), name='hackaton_user_registration'),
+    path('api/v1/hackaton/my_team/', MyTeamListView.as_view(), name='hackaton_my_team'),
 ]
+
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

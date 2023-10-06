@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'drf_spectacular_sidecar',
     'rest_framework',
 
-    'Authentication.apps.AuthenticationConfig'
+    'Authentication.apps.AuthenticationConfig',
+    'Hackaton',
 ]
 
 MIDDLEWARE = [
@@ -143,7 +144,13 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ]
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
