@@ -25,19 +25,32 @@ class MyTeamListView(APIView):
     permission_classes = [IsAuthenticated,]
     
     def post(self, request):
-        if User_Team.objects.get(user=Hackaton_User.objects.get(user=request.user)):
-            queryset = User_Team.objects.filter(team=User_Team.objects.get(
-                                                    user=Hackaton_User.objects.get(
-                                                        user=request.user)).pk).only('user')
+        if Hackaton_User.objects.filter(hackaton=request.data.get('id'), 
+                                        user=request.user).exists():
+            if User_Team.objects.filter(user=Hackaton_User.objects.filter(
+                                            hackaton=request.data.get('id'), 
+                                            user=request.user).exists()):
+                
+                queryset = User_Team.objects.filter(team=User_Team.objects.get(
+                                                        user=Hackaton_User.objects.get(
+                                                            hackaton=request.data.get('id'), 
+                                                            user=request.user)).pk).only('user')
             
-            serializer_class = ListTeamSerializer(queryset, many=True)
+                serializer_class = ListTeamSerializer(queryset, many=True)
 
-            data = {
-                'team': serializer_class.data
+                data = {
+                    'answer':'ok',
+                    'team': serializer_class.data
+                }
+                
+            else:
+                data = {
+                'answer': 'not on team'
             }
+                
         else:
             data = {
-                'team': 'error'
+                'answer': 'not registered'
             }
         
         return Response({'get':data})
