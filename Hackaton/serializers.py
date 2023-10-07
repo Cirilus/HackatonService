@@ -15,3 +15,9 @@ class ListTeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = User_Team
         fields = ('username', 'email')
+
+
+class InviteTeamSErializer(serializers.ModelSerializer):
+    class Meta:
+        model = Team_Invite
+        fields = '__all__'

@@ -7,7 +7,16 @@ class HackatonAdmin(admin.ModelAdmin):
     search_fields = ['title', 'creator',]
 
 
+class HackatonUserAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'user')
+
+
+class InviteTeamAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'team', 'user')
+
+
 admin.site.register(Hackaton, HackatonAdmin)
-admin.site.register(Hackaton_User)
+admin.site.register(Hackaton_User, HackatonUserAdmin)
+admin.site.register(Team_Invite, InviteTeamAdmin)
 admin.site.register(Team)
 admin.site.register(User_Team)

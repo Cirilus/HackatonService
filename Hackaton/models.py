@@ -28,6 +28,7 @@ class Team(models.Model):
     title = models.CharField(max_length=150)
     description = models.TextField()
     hackaton = models.ForeignKey(Hackaton, on_delete=models.CASCADE)
+    owner = models.ForeignKey(Hackaton_User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -40,3 +41,7 @@ class User_Team(models.Model):
     def __str__(self) -> str:
         return self.user.user.username
 
+
+class Team_Invite(models.Model):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    user = models.ForeignKey(Hackaton_User, on_delete=models.CASCADE)
