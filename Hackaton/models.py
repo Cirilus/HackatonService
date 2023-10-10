@@ -13,7 +13,7 @@ class Hackaton(models.Model):
     end = models.DateTimeField()
 
     def __str__(self) -> str:
-        return self.title
+        return self.title + " " + self.creator
     
 
 class Hackaton_User(models.Model):
@@ -46,8 +46,3 @@ class User_Team(models.Model):
 
     def __str__(self) -> str:
         return self.user.user.username + ' ' + self.team.hackaton.title + ' ' + self.team.title
-
-
-class Team_Invite(models.Model):
-    team = models.ForeignKey(Team, on_delete=models.PROTECT)
-    user = models.ForeignKey(Hackaton_User, on_delete=models.PROTECT)

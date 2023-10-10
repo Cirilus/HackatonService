@@ -2,10 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from .serializers import HackatonUserSerializer, ListTeamSerializer, TeamSerializer
+from .serializers import HackatonUserSerializer, ListTeamSerializer, TeamSerializer, HackatonSerializer
 from rest_framework.response import Response
 from django.http import JsonResponse
-from .models import User_Team, Team, Hackaton_User 
+from django.forms.models import model_to_dict
+from .models import User_Team, Team, Hackaton_User, Hackaton
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 
 
@@ -18,7 +19,7 @@ class HackatonUserView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response({'status':'ok'})
+        return JsonResponse({'status':'ok'})
 
 
 #получение списка своей команды по id хакатона
@@ -30,7 +31,7 @@ class MyTeamListView(APIView):
         
         try:
             user = User_Team.objects.get(user=Hackaton_User.objects.get(
-                                            hackaton=request.data.get('id'), 
+                                            hackaton=request.data.get('id_hackaton'), 
                                             user=request.user), is_invited=False)
         except:
             data['status'] = 'not registered on hackaton'
@@ -68,7 +69,7 @@ class InviteTeamView(APIView):
             
             data['status'] = 'ok'
 
-        return Response(data)
+        return JsonResponse(data)
     
     #принять инвайт
     def put(self, request):
@@ -91,7 +92,7 @@ class InviteTeamView(APIView):
 
             data['status'] = 'ok'
 
-        return Response(data)
+        return JsonResponse(data)
     
 
     #Выйти из команды
@@ -102,11 +103,36 @@ class InviteTeamView(APIView):
             User_Team.objects.get(user=Hackaton_User.objects.get(
                                                                 hackaton=request.data.get('id_hackaton'), 
                                                                 user=request.user),
-                                                                is_invited=False).delete()
+                                                                is_invited=False
+                                                                ).delete()
             data['status'] = 'ok'
         except:
             data['status'] = 'not found'
 
-        return Response(data)
+        return JsonResponse(data)
 
-    
+
+class KickUserView(APIView):
+    permission_classes = [IsAuthenticated,]
+    #Удалить юзера из команды (id_hackaton_user, id_hackaton)
+    def delete(self, request):
+        data = {}
+        try:
+            team = Team.objects.get(owner=Hackaton_User.objects.get(user=request.user, 
+                                                                    hackaton=request.data.get('id_hackaton')))
+            User_Team.objects.get(team=team, user=request.data.get('id_hackaton_user')).delete()
+            data['status'] = 'success'
+            
+        except:
+            data['status'] = 'error'
+        
+        return JsonResponse(data)
+
+
+#получение хакатона по id
+class HackatonView(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request):
+        hackaton = Hackaton.objects.get(pk=request.data.get('id_hackaton'))
+        return JsonResponse(model_to_dict(hackaton))
