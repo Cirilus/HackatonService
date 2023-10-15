@@ -1,43 +1,58 @@
 from .models import Hackaton_User, User_Team, Team, Hackaton
 
-def get_hackaton_user(pk=None, user=None, id_hackaton=None):
-    if pk:
-        return Hackaton_User.objects.filter(pk=pk).first()
-    else:
+
+class GetHackaton():
+    def get_hackaton(self, pk):
+        return Hackaton.objects.filter(pk=pk).first()
+    
+    def list_hackaton(self):
+        return Hackaton.objects.all()
+
+
+class GetHackatonUser():
+    def get_from_user_hack(self, user, id_hackaton):
         return Hackaton_User.objects.filter(user=user, hackaton=id_hackaton).first()
 
 
-def get_user_team(team=None, user=None, id_hackaton=None):
-    if team:
+class GetTeam():
+    def get_from_owner_hack(self, user, id_hackaton):
+        owner = GetHackatonUser().get_from_user_hack(user, id_hackaton)
+        if owner:
+            return Team.objects.filter(owner=owner).first()
+        return None
+    
+    def get_list_team(self, team):
+        return User_Team.objects.filter(team=team).select_related('user')
+    
+
+class GetUserTeam():
+    def get_invited(self, team, user):
         return User_Team.objects.filter(team=team, user__user=user, is_invited=True).first()
-    else:
-        hackaton_user = get_hackaton_user(user=user, id_hackaton=id_hackaton)
-        return User_Team.objects.filter(user=hackaton_user, is_invited=False).first()
+    
+    def get_from_user(self, user, id_hackaton):
+        user_hack = GetHackatonUser().get_from_user_hack(user, id_hackaton)
+        return User_Team.objects.filter(user=user_hack, is_invited=False).first()
 
 
-def get_list_team(team):
-    return User_Team.objects.filter(team=team, is_invited=False).select_related('user')
+class DeleteUserTeam():
+    def leave_from_team(self, user, id_hackaton):
+        user_team = GetUserTeam().get_from_user(user, id_hackaton)
 
-
-def get_team(owner, id_hackaton):
-    user = get_hackaton_user(user=owner, id_hackaton=id_hackaton)
-    return Team.objects.filter(owner=user).first()
-
-
-def delete_user_team(user, id_hackaton, owner=None):
-    if owner:
-        team = Team.objects.filter(owner=get_hackaton_user(user=owner, id_hackaton=id_hackaton)).first()
-        User_Team.objects.filter(team=team, user__user=user).first().delete()
-
-    else:
-        user_hackaton = get_hackaton_user(user=user, id_hackaton=id_hackaton)
-        user_team = User_Team.objects.filter(user=user_hackaton, is_invited=False).first()
-
-        if user_team:
+        if not user_team is None:
             user_team.delete()
-
             return True
+        
+        return False
 
+    def kick_user(self, user, id_hackaton, owner):
+        team = GetTeam().get_from_owner_hack(owner, id_hackaton)
 
-def get_hackaton(id_hackaton):
-    return Hackaton.objects.filter(pk=id_hackaton).first()
+        if team:
+            hack_user = GetUserTeam().get_from_user(user, id_hackaton)
+            
+            if hack_user:
+                hack_user.delete()
+                return True
+            
+        return False
+

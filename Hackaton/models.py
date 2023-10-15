@@ -22,7 +22,7 @@ class Hackaton_User(models.Model):
     place = models.IntegerField()
 
     def __str__(self) -> str:
-        return self.user.username + ' ' + self.hackaton.title
+        return self.user.username + ' ' + self.hackaton.title + ' ' + str(self.user.pk)
 
 
 class Team(models.Model):
@@ -44,5 +44,9 @@ class User_Team(models.Model):
     team = models.ForeignKey(Team, on_delete=models.PROTECT)
     is_invited = models.BooleanField(default=True)
 
+    def clean(self):
+        if self.team.owner.hackaton != self.user.hackaton:
+            raise ValidationError('error')
+        
     def __str__(self) -> str:
         return self.user.user.username + ' ' + self.team.hackaton.title + ' ' + self.team.title
