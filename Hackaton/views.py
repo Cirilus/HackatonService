@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.models import User
+from users.models import User
+from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from .serializers import HackatonUserSerializer, ListTeamSerializer, TeamSerializer, HackatonSerializer
@@ -10,13 +11,14 @@ from .models import User_Team, Team, Hackaton_User, Hackaton
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from .queries import GetHackaton, GetHackatonUser, GetTeam, GetUserTeam, DeleteUserTeam
 
-
-#регистрация пользователя на хакатон
+#регистрация пользователя на хакатон по id
 class HackatonUserView(APIView):
     permission_classes = [IsAuthenticated,]
 
     def post(self, request):
         request.data['user'] = request.user.pk
+        request.data['hackaton'] = request.data.get('id_hackaton')
+
         serializer = HackatonUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -33,7 +35,7 @@ class MyTeamListView(APIView):
         user = GetUserTeam().get_from_user(user=request.user.pk, id_hackaton=request.data.get('id_hackaton'))
 
         if user: 
-            queryset = GetTeam().get_list_team(user.team.pk)
+            queryset = GetUserTeam().get_list_team(user.team.pk)
             serializer_class = ListTeamSerializer(queryset, many=True)
 
             data['result'] = 'success'
@@ -92,7 +94,7 @@ class InviteTeamView(APIView):
     def delete(self, request):
         data = {}
 
-        if DeleteUserTeam().leave_from_team(request.user, 
+        if DeleteUserTeam().leave_from_team(request.user.pk, 
                             request.data.get('id_hackaton')):
             data['result'] = 'success'
         else:

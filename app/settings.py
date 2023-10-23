@@ -21,6 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = env.str('SECRET_KEY', "dafic[124i02gkcao[g45[]cf")
 
+AUTH_USER_MODEL = 'users.User'
+
 DEBUG = env.bool('DEBUG', default=True)
 
 ALLOWED_HOSTS = ['*']
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
 
     'Authentication.apps.AuthenticationConfig',
     'Hackaton',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -125,6 +128,7 @@ USE_TZ = True
 
 MEDIA_ROOT = 'media'
 MEDIA_URL = env.str('MEDIA_URL', default='media/')
+
 STATIC_ROOT = 'static'
 STATIC_URL = env.str('STATIC_URL', default='static/')
 

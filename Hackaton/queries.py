@@ -21,8 +21,10 @@ class GetTeam():
             return Team.objects.filter(owner=owner).first()
         return None
     
-    def get_list_team(self, team):
-        return User_Team.objects.filter(team=team).select_related('user')
+    def delete_team(self, team):
+        team = Team.objects.filter(pk=team).first()
+        if team:
+            team.delete()
     
 
 class GetUserTeam():
@@ -31,15 +33,32 @@ class GetUserTeam():
     
     def get_from_user(self, user, id_hackaton):
         user_hack = GetHackatonUser().get_from_user_hack(user, id_hackaton)
-        return User_Team.objects.filter(user=user_hack, is_invited=False).first()
-
+        if user_hack:
+            return User_Team.objects.filter(user=user_hack, is_invited=False).first()
+        return None
+    
+    def get_list_team(self, team):
+        return User_Team.objects.filter(team=team, is_invited=False).select_related('user')
+    
 
 class DeleteUserTeam():
     def leave_from_team(self, user, id_hackaton):
         user_team = GetUserTeam().get_from_user(user, id_hackaton)
 
         if not user_team is None:
+            team = user_team.team
+
+            if team.owner == user_team.user:
+                new_owner = GetUserTeam().get_from_user(user=user, id_hackaton=id_hackaton)
+
+                if new_owner:
+                    team.owner = new_owner.user
+                    team.save()
+                else:
+                    team.delete()
+            
             user_team.delete()
+
             return True
         
         return False

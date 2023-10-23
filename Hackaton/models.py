@@ -1,19 +1,35 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from users.models import User
 from django.core.exceptions import ValidationError
+from django.contrib.postgres.fields import ArrayField
 import datetime
+from django.core.validators import FileExtensionValidator
 
 class Hackaton(models.Model):
     title = models.CharField(max_length=150)
+    imageUrl = models.ImageField(upload_to='hackatons/')
     description = models.TextField()
+    descriptionShort = models.TextField()
     creator = models.CharField(max_length=150)
+
     start_registration = models.DateTimeField(default=datetime.datetime.now)
     end_registration = models.DateTimeField()
     start = models.DateTimeField(default=datetime.datetime.now)
     end = models.DateTimeField()
 
-    def __str__(self) -> str:
+    # tracks = ArrayField(models.CharField(max_length=150), default=list)
+    grandPrize = models.CharField(max_length=150, blank=True)
+    # roles = ArrayField(models.CharField(max_length=150), default=list)
+    location = models.CharField(max_length=150, blank=True)
+    isOnline = models.BooleanField(default=True)
+
+    def __str__(self):
         return self.title + " " + self.creator
+    
+    def clean(self):
+        if self.imageUrl.size > 3 * 1024 * 1024 * 8:
+            raise ValidationError('image size is too large')
     
 
 class Hackaton_User(models.Model):
@@ -21,8 +37,8 @@ class Hackaton_User(models.Model):
     hackaton = models.ForeignKey(Hackaton, on_delete=models.PROTECT)
     place = models.IntegerField()
 
-    def __str__(self) -> str:
-        return self.user.username + ' ' + self.hackaton.title + ' ' + str(self.user.pk)
+    def __str__(self):
+       return self.user.username + ' ' + self.hackaton.title + ' ' + str(self.user.pk)
 
 
 class Team(models.Model):
@@ -48,5 +64,5 @@ class User_Team(models.Model):
         if self.team.owner.hackaton != self.user.hackaton:
             raise ValidationError('error')
         
-    def __str__(self) -> str:
+    def __str__(self):
         return self.user.user.username + ' ' + self.team.hackaton.title + ' ' + self.team.title
