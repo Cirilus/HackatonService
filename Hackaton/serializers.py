@@ -24,6 +24,8 @@ class TeamSerializer(serializers.ModelSerializer):
 
 
 class HackatonSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Hackaton
         fields = '__all__'
+        

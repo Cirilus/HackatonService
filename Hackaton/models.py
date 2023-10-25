@@ -38,7 +38,7 @@ class Hackaton_User(models.Model):
     place = models.IntegerField()
 
     def __str__(self):
-       return self.user.username + ' ' + self.hackaton.title + ' ' + str(self.user.pk)
+       return self.user.middle_name + ' ' + self.hackaton.title + ' ' + str(self.user.pk)
 
 
 class Team(models.Model):
@@ -65,4 +65,4 @@ class User_Team(models.Model):
             raise ValidationError('error')
         
     def __str__(self):
-        return self.user.user.username + ' ' + self.team.hackaton.title + ' ' + self.team.title
+        return self.user.user.middle_name + ' ' + self.team.hackaton.title + ' ' + self.team.title

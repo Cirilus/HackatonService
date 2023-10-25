@@ -10,6 +10,9 @@ from django.forms.models import model_to_dict
 from .models import User_Team, Team, Hackaton_User, Hackaton
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from .queries import GetHackaton, GetHackatonUser, GetTeam, GetUserTeam, DeleteUserTeam
+import jwt
+from app.settings import ALLOWED_HOSTS
+
 
 #регистрация пользователя на хакатон по id
 class HackatonUserView(APIView):
@@ -33,7 +36,7 @@ class MyTeamListView(APIView):
     def get(self, request):
         data = {}
         user = GetUserTeam().get_from_user(user=request.user.pk, id_hackaton=request.data.get('id_hackaton'))
-
+    
         if user: 
             queryset = GetUserTeam().get_list_team(user.team.pk)
             serializer_class = ListTeamSerializer(queryset, many=True)
@@ -76,16 +79,15 @@ class InviteTeamView(APIView):
 
         user_team = GetUserTeam().get_invited(team=request.data.get('team'), user=request.user.pk)
 
-        if user_team is None:
-            data['result'] = 'error'
-            data['data'] = '404'
-        else:
+        if user_team and GetUserTeam().get_list_team(team=request.data.get('team')) < 5:
             DeleteUserTeam.leave_from_team(user=request.user.pk, id_hackaton=user_team.user.hackaton.pk)
-
             user_team.is_invited = False
             user_team.save()
-
             data['result'] = 'success'
+
+        else:
+            data['result'] = 'error'
+            data['data'] = '404'
 
         return JsonResponse(data)
     
@@ -133,3 +135,33 @@ class HackatonView(APIView):
             data['data'] = '405'
 
         return JsonResponse(data)
+    
+
+class HackatonUrlInvite(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request):
+        team = GetTeam().get_from_owner_hack(user=request.user, 
+                                             id_hackaton=request.data.get('id_hackaton'))
+        
+        token = jwt.encode({'team':team.pk}, 'secret_key', algorithm='HS256')
+        
+        return JsonResponse({'result':'success', 
+                             'data':'http://127.0.0.1:8000/api/v1/invite_url/' + token})
+    
+    def post(self, request):
+        token = request.POST.get('token')
+        team_id =  jwt.decode(token, 'secret_key', algorithms=['HS256'])['team']
+        team = GetTeam().get_team(team_id)
+        user_hack = GetHackatonUser().get_from_user_hack(user=request.user.pk, id_hackaton=team.hackaton.pk)
+
+        if team and user_hack and len(GetUserTeam().get_list_team(team_id)) < 5:
+            DeleteUserTeam().leave_from_team(user=request.user.pk, id_hackaton=team.hackaton.pk)
+
+            serializer = TeamSerializer(data={'user': user_hack.pk, 'team':team.pk, 'is_invited':False})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return JsonResponse({'result':'success'})
+
+        return JsonResponse({'result':'error', 'data':'404'})

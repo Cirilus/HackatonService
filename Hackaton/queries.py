@@ -15,6 +15,9 @@ class GetHackatonUser():
 
 
 class GetTeam():
+    def get_team(id_team):
+        return Team.objects.filter(pk=id_team).first()
+    
     def get_from_owner_hack(self, user, id_hackaton):
         owner = GetHackatonUser().get_from_user_hack(user, id_hackaton)
         if owner:
