@@ -3,7 +3,7 @@ from users.models import User
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from .serializers import HackatonUserSerializer, ListTeamSerializer, TeamSerializer, HackatonSerializer
+from .serializers import HackatonUserSerializer, ListTeamSerializer, UserTeamSerializer, HackatonSerializer, TeamSerializer
 from rest_framework.response import Response
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
@@ -12,6 +12,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAu
 from .queries import GetHackaton, GetHackatonUser, GetTeam, GetUserTeam, DeleteUserTeam
 import jwt
 from app.settings import ALLOWED_HOSTS
+from .exceptions import NotFoundHackaton, NotFoundHackatonUser, NotFoundTeam, NotFoundUserTeam, NotFoundInvite, TeamIsFull
+from django.core.cache import cache
+import uuid
 
 
 #регистрация пользователя на хакатон по id
@@ -26,7 +29,47 @@ class HackatonUserView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return JsonResponse({'result':'success'})
+        return Response(status=200, data={'result':'success'})
+
+
+class TeamView(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request):
+        try:
+            user_team = GetUserTeam().get_from_user(user=request.user.pk, 
+                                                    id_hackaton=request.data.get('id_hackaton'))
+            if user_team is None:
+                raise NotFoundUserTeam
+            
+            queryset = user_team.team
+            serializer = TeamSerializer(queryset)
+            return Response(status=200, data={'result':serializer.data})
+        
+        except NotFoundUserTeam:
+            return Response(status=404, data={'error':'Вы не состоите в команде'})
+
+    #создать команду
+    def post(self, request):
+        try:
+            user_hack = GetHackatonUser().get_from_user_hack(user=request.user.pk, 
+                                                            id_hackaton=request.data.get('id_hackaton'))
+            if user_hack is None:
+                raise NotFoundHackatonUser
+            
+            DeleteUserTeam().leave_from_team(user=request.user.pk, 
+                                             id_hackaton=request.data.get('id_hackaton'))  
+            
+            request.data['user'] = user_hack.pk
+            request.data['hackaton'] = request.data['id_hackaton']
+
+            serializer = TeamSerializer(data=request.data)   
+            serializer.is_valid(raise_exception=True) 
+            serializer.save()
+            return Response(status=200, data={'result':'success'})
+        
+        except NotFoundHackatonUser:
+            return Response(status=404, data={'error':'Вы не зарегистрированы на хакатон'})
 
 
 #получение списка своей команды по id хакатона
@@ -34,21 +77,18 @@ class MyTeamListView(APIView):
     permission_classes = [IsAuthenticated,]
     
     def get(self, request):
-        data = {}
-        user = GetUserTeam().get_from_user(user=request.user.pk, id_hackaton=request.data.get('id_hackaton'))
-    
-        if user: 
+        try:
+        
+            user = GetUserTeam().get_from_user(user=request.user.pk, id_hackaton=request.data.get('id_hackaton'))
+            if user is None:
+                raise NotFoundUserTeam
+            
             queryset = GetUserTeam().get_list_team(user.team.pk)
             serializer_class = ListTeamSerializer(queryset, many=True)
-
-            data['result'] = 'success'
-            data['data'] = serializer_class.data
-        else:
-            data['result'] = 'error'
-            data['data'] = '404'
-
-        return JsonResponse(data)
-
+            return Response(status=200, data={'result':serializer_class.data})
+        
+        except NotFoundUserTeam:
+            return Response(status=404, data={'error':'Вы не состоите в команде'}) 
 
 #Приглашение в команду
 class InviteTeamView(APIView):
@@ -56,55 +96,55 @@ class InviteTeamView(APIView):
     
     #дать инвайт
     def post(self, request):
-        data = {}
+        try:
+            team = GetTeam().get_from_owner_hack(request.user.pk, 
+                                             request.data.get('id_hackaton'))
+            if team is None:
+                raise NotFoundTeam
+            
+            user = GetHackatonUser().get_from_user_hack(request.data.get('user'), 
+                                                    request.data.get('id_hackaton'))
+            if user is None:
+                raise NotFoundHackaton
 
-        user = GetHackatonUser().get_from_user_hack(request.data.get('user'), request.data.get('id_hackaton'))
-        team = GetTeam().get_from_owner_hack(request.user.pk, request.data.get('id_hackaton'))
-        print(team.owner)
-        if team is None:
-            data['result'] = 'error'
-            data['data'] = '404'
-        else:
-            serializer = TeamSerializer(data={'user': user.pk, 'team':team.pk})
+            serializer = UserTeamSerializer(data={'user': user.pk, 'team':team.pk})
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            
-            data['result'] = 'success'
-
-        return JsonResponse(data)
+            return Response(status=200, data={'result':'success'})
+        
+        except NotFoundHackatonUser:
+            return Response(status=404, data={'error':'Пользователь не найден'})
+        except NotFoundTeam:
+            return Response(status=404, data={'error':'Вы не являетесь создателем команды'})
     
     #принять инвайт
     def put(self, request):
-        data = {}
-
-        user_team = GetUserTeam().get_invited(team=request.data.get('team'), user=request.user.pk)
-
-        if user_team and GetUserTeam().get_list_team(team=request.data.get('team')) < 5:
+        try:
+            user_team = GetUserTeam().get_invited(team=request.data.get('team'), user=request.user.pk)
+            if user_team is None:
+                raise NotFoundUserTeam
+            
+            if GetUserTeam().get_list_team(team=request.data.get('team')) >= 5:
+                raise TeamIsFull
+            
             DeleteUserTeam.leave_from_team(user=request.user.pk, id_hackaton=user_team.user.hackaton.pk)
             user_team.is_invited = False
             user_team.save()
-            data['result'] = 'success'
-
-        else:
-            data['result'] = 'error'
-            data['data'] = '404'
-
-        return JsonResponse(data)
+            return Response(status=200, data={'result':'success'})
+        
+        except NotFoundUserTeam:
+            return Response(status=404, data={'error':'Приглашение не найдено'})
+        except TeamIsFull:
+            return Response(status=405, data={'error':'Команда переполнена'})
     
 
     #Выйти из команды
     def delete(self, request):
-        data = {}
-
         if DeleteUserTeam().leave_from_team(request.user.pk, 
                             request.data.get('id_hackaton')):
-            data['result'] = 'success'
-        else:
-            data['result'] = 'error'
-            data['data'] = '405'
-
-        return JsonResponse(data)
-
+            
+            return Response(status=200, data={'result':'success'})
+        return Response(status=405, data={'error':'Не удалось выполнить выход'})
 
 class KickUserView(APIView):
     permission_classes = [IsAuthenticated,]
@@ -115,8 +155,8 @@ class KickUserView(APIView):
                          id_hackaton=request.data.get('id_hackaton'), 
                          owner=request.user.pk):
         
-            return JsonResponse({'result':'success'})
-        return JsonResponse({'result':'error', 'data':'405'})
+            return JsonResponse(status=200, data={'result':'success'})
+        return Response(status=404, data={'error':'Пользователь не найден'})
 
 
 #получение хакатона по id
@@ -124,44 +164,60 @@ class HackatonView(APIView):
     permission_classes = [IsAuthenticated,]
 
     def get(self, request):
-        data = {}
         hackaton = GetHackaton().get_hackaton(request.data.get('id_hackaton'))
 
         if hackaton:
-            data['result'] = 'success'
-            data['data'] = model_to_dict(hackaton)
-        else:
-            data['result'] = 'error'
-            data['data'] = '405'
-
-        return JsonResponse(data)
+            return Response(status=200, data={'result':model_to_dict(hackaton)})
+        return Response(status=404, data={'error':'Хакатон не найден'})
     
 
 class HackatonUrlInvite(APIView):
     permission_classes = [IsAuthenticated,]
 
-    def get(self, request):
-        team = GetTeam().get_from_owner_hack(user=request.user, 
-                                             id_hackaton=request.data.get('id_hackaton'))
-        
-        token = jwt.encode({'team':team.pk}, 'secret_key', algorithm='HS256')
-        
-        return JsonResponse({'result':'success', 
-                             'data':'http://127.0.0.1:8000/api/v1/invite_url/' + token})
-    
     def post(self, request):
-        token = request.POST.get('token')
-        team_id =  jwt.decode(token, 'secret_key', algorithms=['HS256'])['team']
-        team = GetTeam().get_team(team_id)
-        user_hack = GetHackatonUser().get_from_user_hack(user=request.user.pk, id_hackaton=team.hackaton.pk)
+        try:
+            team = GetTeam().get_from_owner_hack(user=request.user, 
+                                             id_hackaton=request.data.get('id_hackaton')) 
+            if team is None:
+                raise NotFoundTeam 
+               
+            key = str(uuid.uuid4())
+            cache.set(key, team.pk, 10800)
+        
+            return Response(status=200, data={'result':'http://127.0.0.1:8000/api/v1/hackaton/invite_url/?team=' + key})
+        except NotFoundTeam:
+            return Response(status=404, data={'error':'Команда не найдена'})
+    
+    def get(self, request):
+        try:
+            token = request.GET.get('team')
 
-        if team and user_hack and len(GetUserTeam().get_list_team(team_id)) < 5:
+            id_team =  cache.get(token)
+            if id_team is None:
+                raise NotFoundInvite
+
+            team = GetTeam().get_team(id_team)
+            if team is None:
+                raise NotFoundTeam
+            
+            user_hack = GetHackatonUser().get_from_user_hack(user=request.user.pk, id_hackaton=team.hackaton.pk)
+            if user_hack is None:
+                raise NotFoundHackatonUser
+            
+            if len(GetUserTeam().get_list_team(id_team)) >= 5:
+                raise TeamIsFull
+            
             DeleteUserTeam().leave_from_team(user=request.user.pk, id_hackaton=team.hackaton.pk)
-
-            serializer = TeamSerializer(data={'user': user_hack.pk, 'team':team.pk, 'is_invited':False})
+            serializer = UserTeamSerializer(data={'user': user_hack.pk, 'team':team.pk, 'is_invited':False})
             serializer.is_valid(raise_exception=True)
             serializer.save()
-
-            return JsonResponse({'result':'success'})
-
-        return JsonResponse({'result':'error', 'data':'404'})
+            return Response(status=200, data={'result':'success'})
+        
+        except NotFoundTeam:
+            return Response(status=404, data={'error':'Команда не найдена'})
+        except NotFoundInvite:
+            return Response(status=404, data={'error':'Приглашение в команду устарело'})
+        except TeamIsFull:
+            return Response(status=405, data={'error':'Команда переполнена'})
+        except NotFoundHackatonUser:
+            return Response(status=200, data={'error':'Вы не зарегистрированы на хакатоне'})
