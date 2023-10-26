@@ -40,40 +40,36 @@ urlpatterns = [
     path('api/v1/hackaton/info/', HackatonView.as_view(), name='hackaton_info'),
 
 
-    path('resumes/<int:resume_id>/<str:model_name>/create/', CreateByResume.as_view(), name='create-by-resume'),
-    path('resumes/<int:resume_id>/<str:model_name>/', RetrieveUpdateDestroyByResume.as_view(), name='detail-by-resume'),
+    #resume
+    path('api/v1/resume_RUD/<int:pk>/', RUD_ResumeByUser.as_view(),
+         name='Get_Put_Delete_Resume_By_User_ID'), #получение resume по user_id
 
+    path('api/v1/resume_create/<int:pk>/', Create_ResumeByUser.as_view(),
+         name='Post_Resume_By_User_ID'), #создание resume по user_id
 
-    # #resume
-    # path('api/v1/resume_RUD/<int:pk>/', RUD_ResumeByUser.as_view(),
-    #      name='Get_Put_Delete_Resume_By_User_ID'), #получение resume по user_id
-    #
-    # path('api/v1/resume_create/<int:pk>/', Create_ResumeByUser.as_view(),
-    #      name='Post_Resume_By_User_ID'), #создание resume по user_id
-    #
-    # path('api/v1/work_RUD/<int:pk>/', RUD_WorkByResume.as_view(),
-    #      name='Get_Put_Delete_Work_By_Resume_ID'), #получение work по resume_id
-    #
-    # path('api/v1/work_create/<int:pk>/', Create_WorkByResume.as_view(),
-    #      name='Post_Work_By_Resume_ID'), #создание work по resume_id
-    #
-    # path('api/v1/contact_RUD/<int:pk>/', RUD_СontactByResume.as_view(),
-    #      name='Get_Put_Delete_Contact_By_ResumeID'), #получение contact по resume_id
-    #
-    # path('api/v1/contact_create/<int:pk>/', Create_ContactByResume.as_view(),
-    #      name='Post_Contact_By_Resume_ID'), #создание contact по resume_id
-    #
-    # path('api/v1/hackatons_RUD/<int:pk>/', RUD_HackatonsByResume.as_view(),
-    #      name='Get_Put_Delete_Hackatons_By_Resume_ID'), #получение hackatons по resume_id
-    #
-    # path('api/v1/hackatons_create/<int:pk>/', Create_HackatonsByResume.as_view(),
-    #      name='Post_Hackatons_By_Resume_ID'), #создание hackatons по resume_id
-    #
-    # path('api/v1/educaion_RUD/<int:pk>/', RUD_EducationByResume.as_view(),
-    #      name='Get_Put_Delete_Education_By_Resume_ID'), #получение education по resume_id
-    #
-    # path('api/v1/educaion_create/<int:resume_id>/', Create_EducationByResume.as_view(),
-    #      name='Post_Education_By_Resume_ID'), #создание education по resume_id
+    path('api/v1/work_RUD/<int:pk>/', RUD_WorkByResume.as_view(),
+         name='Get_Put_Delete_Work_By_Resume_ID'), #получение work по resume_id
+
+    path('api/v1/work_create/<int:pk>/', Create_WorkByResume.as_view(),
+         name='Post_Work_By_Resume_ID'), #создание work по resume_id
+
+    path('api/v1/contact_RUD/<int:pk>/', RUD_СontactByResume.as_view(),
+         name='Get_Put_Delete_Contact_By_ResumeID'), #получение contact по resume_id
+
+    path('api/v1/contact_create/<int:pk>/', Create_ContactByResume.as_view(),
+         name='Post_Contact_By_Resume_ID'), #создание contact по resume_id
+
+    path('api/v1/hackatons_RUD/<int:pk>/', RUD_HackatonsByResume.as_view(),
+         name='Get_Put_Delete_Hackatons_By_Resume_ID'), #получение hackatons по resume_id
+
+    path('api/v1/hackatons_create/<int:pk>/', Create_HackatonsByResume.as_view(),
+         name='Post_Hackatons_By_Resume_ID'), #создание hackatons по resume_id
+
+    path('api/v1/educaion_RUD/<int:pk>/', RUD_EducationByResume.as_view(),
+         name='Get_Put_Delete_Education_By_Resume_ID'), #получение education по resume_id
+
+    path('api/v1/educaion_create/<int:resume_id>/', Create_EducationByResume.as_view(),
+         name='Post_Education_By_Resume_ID'), #создание education по resume_id
 
 
 ]
