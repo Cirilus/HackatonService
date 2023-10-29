@@ -18,6 +18,7 @@ from .exceptions import NotFoundHackaton, NotFoundHackatonUser, NotFoundTeam, No
 from django.core.cache import cache
 import uuid
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 #регистрация пользователя на хакатон по id
@@ -54,12 +55,21 @@ class TeamView(APIView):
         DeleteUserTeam().leave_from_team(user=request.user.pk, 
                                              id_hackaton=request.data.get('id_hackaton'))  
             
-        request.data['user'] = user_hack.pk
+        request.data['owner'] = user_hack.pk
         request.data['hackaton'] = request.data['id_hackaton']
 
         serializer = TeamSerializer(data=request.data)   
         serializer.is_valid(raise_exception=True) 
         serializer.save()
+
+        request.data['team'] = serializer.data['id']
+        request.data['user'] = user_hack.pk
+        request.data['is_invited'] = False
+
+        serializer = UserTeamSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True) 
+        serializer.save()
+
         return Response(status=200, data={'result':'success'})
 
 
@@ -124,16 +134,11 @@ class KickUserView(APIView):
         return JsonResponse(status=200, data={'result':'success'})
 
 
-#получение хакатона по id
-class HackatonView(APIView):
-    permission_classes = [IsAuthenticated,]
-
-    def get(self, request):
-        hackaton = GetHackaton().get_hackaton(request.data.get('id_hackaton'))
-        return Response(status=200, data={'result':model_to_dict(hackaton)})
-    
 #получение хакатона по id и списка хакатонов
-class HackatonListApi(generics.GenericAPIView, mixins.ListModelMixin):
+class HackatonListApi(generics.GenericAPIView, 
+                      mixins.CreateModelMixin, 
+                      mixins.ListModelMixin):
+    parser_classes = (MultiPartParser, FormParser)
     serializer_class = HackatonSerializer
 
     def get_queryset(self):
@@ -145,6 +150,9 @@ class HackatonListApi(generics.GenericAPIView, mixins.ListModelMixin):
     
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
 class HackatonUrlInvite(APIView):

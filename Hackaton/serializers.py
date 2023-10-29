@@ -9,7 +9,7 @@ class HackatonUserSerializer(serializers.ModelSerializer):
 
 
 class ListTeamSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.user.username')
+    username = serializers.CharField(source='user.user.middle_name')
     email = serializers.CharField(source='user.user.email')
 
     class Meta:
@@ -24,7 +24,7 @@ class UserTeamSerializer(serializers.ModelSerializer):
 
 
 class HackatonSerializer(serializers.ModelSerializer):
-
+    imageUrl = serializers.ImageField()
     class Meta:
         model = Hackaton
         fields = '__all__'

@@ -27,13 +27,20 @@ class ManagerTeam():
 
 
 class ManagerUserTeam():
+    def check_team(self, user, id_hackaton, id_team=None):
+        hackaton_user = ManagerHackatonUser().get_hackaton_user(user, id_hackaton)
+        if hackaton_user:
+            if id_team:
+                user_team = User_Team.objects.filter(user=hackaton_user, team=id_team, is_invited=True).first()
+                return user_team
+            user_team = User_Team.objects.filter(user=hackaton_user, is_invited=False).select_related('team').first()
+            return user_team
+        return None
+
     def get_active_invite(self, user, id_team):
         team = ManagerTeam().get_team_from_pk(id_team)
         if team:
-            hackaton_user = ManagerHackatonUser().get_hackaton_user(user, team.hackaton)
-            if hackaton_user:
-                user_team = User_Team.objects.filter(user=hackaton_user, team=team, is_invited=True).first()
-                return user_team
+            return ManagerUserTeam().check_team(user=user, id_hackaton=team.hackaton, id_team=id_team)
         return None
     
     def get_list_active_invites(self, user, id_hackaton):
@@ -44,11 +51,7 @@ class ManagerUserTeam():
         return None
     
     def get_user_team(self, user, id_hackaton):
-        hackaton_user = ManagerHackatonUser().get_hackaton_user(user, id_hackaton)
-        if hackaton_user:
-            user_team = User_Team.objects.filter(user=hackaton_user, is_invited=False).select_related('team').first()
-            return user_team
-        return None
+        return ManagerUserTeam(user=user, id_hackaton=id_hackaton)
     
     def get_list_team(self, id_team):
         team = ManagerTeam().get_team_from_pk(id_team)
