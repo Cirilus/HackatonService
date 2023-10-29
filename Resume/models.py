@@ -14,7 +14,7 @@ import datetime
 создать несколько резюме. или только одно?
 '''
 class Resume(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT, unique=True, related_name="users") #to_field='можно свое указать'
+    user = models.ForeignKey(User, on_delete=models.PROTECT, unique=True, related_name="resume") #to_field='можно свое указать'
     title = models.CharField(max_length=150, verbose_name="Заголовок")
     description = models.TextField(verbose_name="Описание")
     visible = models.BooleanField(default=True, verbose_name="Видимость")
@@ -34,7 +34,7 @@ class Graduation(models.Model):
         return f'title: {self.title}'
 
 class Education(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, unique=True, related_name="resume")
+    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, unique=True, related_name="educaion")
     graduation = models.ForeignKey(Graduation, on_delete=models.CASCADE, null=True, verbose_name="Уровень образования")
     title = models.CharField(max_length=150, verbose_name="Заголовок")
     begin = models.DateTimeField(null=True, verbose_name="Начало образования")
@@ -47,7 +47,7 @@ class Education(models.Model):
 
 
 class Work(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, unique=True, related_name="resume")
+    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, unique=True, related_name="work")
     title = models.CharField(max_length=150, verbose_name="Заголовок")
     description = models.TextField(verbose_name="Описание")
     begin = models.DateTimeField(null=True, verbose_name="Начало")
@@ -62,7 +62,7 @@ class Work(models.Model):
 
 
 class Contact(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, unique=True, related_name='resume')
+    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, unique=True, related_name='contact')
     title = models.CharField(max_length=150, verbose_name="Заголовок")
     body = models.TextField(verbose_name="Тело контакта")
 
@@ -74,7 +74,7 @@ class Contact(models.Model):
 
 
 class Hackatons(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, unique=True, related_name='resume')
+    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, unique=True, related_name='hackatons')
     title = models.CharField(max_length=150, verbose_name="Заголовок")
     description = models.TextField(verbose_name="Описание")
     begin = models.DateTimeField(null=True, verbose_name="Начало хакатона")
