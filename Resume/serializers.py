@@ -4,30 +4,31 @@ from .models import Resume, Graduation, Education, Work, Contact, Hackatons
 class ResumeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resume
-        fields = '__all__'
+        fields = ['user', 'title', 'description','visible','id']
 
 class GraduationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Graduation
-        fields = '__all__'
+        fields = ['id', 'title']
 
 class EducationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Education
-        fields = '__all__'
+        fields = ['resume',  'graduation', 'id', 'title', 'begin', 'end']
+
 
 class WorkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Work
-        fields = '__all__'
+        fields = ['resume', 'id', 'title', 'description', 'begin', 'end']
 
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
-        fields = '__all__'
+        fields = ['resume', 'id', 'title', 'body']
 
 class HackatonsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hackatons
-        fields = '__all__'
+        fields = ['resume', 'id', 'title', 'description','begin', 'end', 'place']
 
