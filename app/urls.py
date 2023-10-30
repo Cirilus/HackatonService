@@ -15,13 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework_simplejwt.views import TokenVerifyView, TokenObtainPairView, TokenRefreshView
 from Hackaton.views import HackatonUserView, MyTeamListView, InviteTeamView, KickUserView, HackatonView
-
+from Resume.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -37,7 +37,12 @@ urlpatterns = [
     path('api/v1/hackaton/my_team/', MyTeamListView.as_view(), name='hackaton_my_team'),
     path('api/v1/hackaton/invite/', InviteTeamView.as_view(), name='invite'),
     path('api/v1/hackaton/kick_user/', KickUserView.as_view(), name='kick_user'),
-    path('api/v1/hackaton/info/', HackatonView.as_view(), name='hackaton_info')
+    path('api/v1/hackaton/info/', HackatonView.as_view(), name='hackaton_info'),
+
+
+
+    path('', include('Resume.urls')), #resume
+
 ]
 
 
