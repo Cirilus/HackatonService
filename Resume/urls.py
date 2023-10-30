@@ -41,7 +41,7 @@ router_work = SimpleRouter()
 router_work.register(r'worklist', WorkByResumeCRUD)
 
 router_contact = SimpleRouter()
-router_contact.register(r'hackatonslist', HackatonsByResumeCRUD)
+router_contact.register(r'contactlist', ContactByResumeCRUD)
 
 router_hackatons = SimpleRouter()
 router_hackatons.register(r'hackatonslist', HackatonsByResumeCRUD)
