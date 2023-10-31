@@ -23,6 +23,7 @@ from rest_framework_simplejwt.views import TokenVerifyView, TokenObtainPairView,
 from Hackaton.views import HackatonUserView, MyTeamListView, InviteTeamView, KickUserView, HackatonView
 from Resume.views import *
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -42,6 +43,7 @@ urlpatterns = [
 
 
     path('', include('Resume.urls')), #resume
+    path('', include('Score.urls')), #score
 
 ]
 

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'Authentication.apps.AuthenticationConfig',
     'Hackaton',
     'Resume',
+    'Score'
 ]
 
 MIDDLEWARE = [

@@ -7,6 +7,8 @@ from rest_framework_simplejwt.views import TokenVerifyView, TokenObtainPairView,
 from Hackaton.views import HackatonUserView, MyTeamListView, InviteTeamView, KickUserView, HackatonView
 from Resume.views import *
 
+#потом удалить ненужные импорты
+
 
 """
 URL configuration for app project.
