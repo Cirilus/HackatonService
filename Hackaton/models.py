@@ -39,6 +39,9 @@ class Hackaton_User(models.Model):
 
     def __str__(self):
        return self.user.middle_name + ' ' + self.hackaton.title + ' ' + str(self.user.pk)
+    
+    class Meta:
+        unique_together = ('user', 'hackaton')
 
 
 class Team(models.Model):

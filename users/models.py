@@ -40,19 +40,3 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-class PointCondition(models.Model):
-    title = models.CharField(max_length=250)
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-
-    def __str__(self):
-        return self.title
-
-
-class History_Point(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    count = models.IntegerField()
-    condition = models.ForeignKey(PointCondition, on_delete=models.PROTECT)
-    created = models.DateTimeField(default=datetime.datetime.now)
-
-    def __str__(self):
-        return self.count

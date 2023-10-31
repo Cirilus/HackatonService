@@ -24,7 +24,6 @@ class UserTeamSerializer(serializers.ModelSerializer):
 
 
 class HackatonSerializer(serializers.ModelSerializer):
-    imageUrl = serializers.ImageField()
     class Meta:
         model = Hackaton
         fields = '__all__'

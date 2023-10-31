@@ -2,8 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from users.models import User
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
-from rest_framework import generics
-from rest_framework import mixins
+from rest_framework import generics, mixins, filters
 from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet
 from .serializers import HackatonUserSerializer, ListTeamSerializer, UserTeamSerializer, HackatonSerializer, TeamSerializer
 from rest_framework.response import Response
@@ -138,15 +137,14 @@ class KickUserView(APIView):
 class HackatonListApi(generics.GenericAPIView, 
                       mixins.CreateModelMixin, 
                       mixins.ListModelMixin):
-    parser_classes = (MultiPartParser, FormParser)
     serializer_class = HackatonSerializer
-
+    
     def get_queryset(self):
         queryset = Hackaton.objects.all()
-        id_hackaton = self.request.data.get('id_hackaton')
-        if id_hackaton:
-            return queryset.filter(pk=id_hackaton)
-        return queryset
+        filter = {}
+        for i in self.request.data.keys():
+            filter[i] = self.request.data[i]
+        return queryset.filter(**filter)
     
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
