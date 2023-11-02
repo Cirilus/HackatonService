@@ -4,7 +4,7 @@ from .models import HistoryPoint, PointCondition
 class HistoryPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistoryPoint
-        fields = ['user', 'condition', 'count','created','id']
+        fields = ['id', 'user_id', 'condition_id', 'count','created',]
 
 class PointConditionSerializer(serializers.ModelSerializer):
     class Meta:

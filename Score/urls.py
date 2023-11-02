@@ -16,17 +16,21 @@ router_history_point.register(r'historypointlist', HistoryPointByUserCRUD)
 
 router_point_condition = SimpleRouter()
 router_point_condition.register(r'pointconditionlist', PointConditionByUserCRUD)
-
+print(router_history_point.urls)
 
 
 urlpatterns = [
-    path('api/v1/', include(router_point_condition.urls)), #http://127.0.0.1:8000/api/v1/pointconditionlist/ (<int:user_id>/)
-    path('api/v1/', include(router_history_point.urls)),  # http://127.0.0.1:8000/api/v1/historypointlist/ (<int:user_id>/)
+    path('api/v1/', include(router_point_condition.urls)), #http://127.0.0.1:8000/api/v1/pointconditionlist/ (<int:pk>/)
+    path('api/v1/', include(router_history_point.urls)),  # http://127.0.0.1:8000/api/v1/historypointlist/ (<int:pk>/)
 
     #получаем запись из таблицы HistoryPoint по указанному condition_id из таблицы PointCondition
     path('api/v1/historypointlist/bycondition/<int:condition_id>/', HistoryPointByUserCRUD.as_view({'get': 'bycondition'})),
+   
+    #получаем все записи из таблицы HistoryPoint по указанному user_id 
+    path('api/v1/historypointlist/byuserid/<int:user_id>/', HistoryPointByUserCRUD.as_view({'get': 'byuserid'})),
+
+    #получаем все записи из таблицы PointCondition по указанному user_id 
+    path('api/v1/pointconditionlist/byuserid/<int:user_id>/', PointConditionByUserCRUD.as_view({'get': 'byuserid'})),
+
 ]
 
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
