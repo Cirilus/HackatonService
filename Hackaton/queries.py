@@ -67,7 +67,7 @@ class GetUserTeam():
     
     def get_from_user(self, user, id_hackaton):
         try:
-            user_hack = ManagerHackatonUser().get_hackaton_user(user, id_hackaton)
+            user_hack = ManagerHackatonUser().get_hackaton_user(user=user, id_hackaton=id_hackaton)
             if user_hack is None:
                 raise NotFoundHackatonUser
             

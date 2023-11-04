@@ -16,7 +16,7 @@ from app.settings import ALLOWED_HOSTS
 from .exceptions import NotFoundHackaton, NotFoundHackatonUser, NotFoundTeam, NotFoundUserTeam, NotFoundInvite, TeamIsFull
 from django.core.cache import cache
 import uuid
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes, api_view
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
@@ -40,8 +40,8 @@ class TeamView(APIView):
 
     def get(self, request):
         user_team = GetUserTeam().get_from_user(user=request.user.pk, 
-                                                    id_hackaton=request.data.get('id_hackaton'))
-            
+                                                id_hackaton=request.data.get('id_hackaton'))
+        
         queryset = user_team.team
         serializer = TeamSerializer(queryset)
         return Response(status=200, data={'result':serializer.data})
@@ -49,10 +49,10 @@ class TeamView(APIView):
     #создать команду
     def post(self, request):
         user_hack = GetHackatonUser().get_from_user_hack(user=request.user.pk, 
-                                                            id_hackaton=request.data.get('id_hackaton'))
+                                                        id_hackaton=request.data.get('id_hackaton'))
             
         DeleteUserTeam().leave_from_team(user=request.user.pk, 
-                                             id_hackaton=request.data.get('id_hackaton'))  
+                                        id_hackaton=request.data.get('id_hackaton'))  
             
         request.data['owner'] = user_hack.pk
         request.data['hackaton'] = request.data['id_hackaton']
@@ -133,12 +133,13 @@ class KickUserView(APIView):
         return JsonResponse(status=200, data={'result':'success'})
 
 
-#получение хакатона по id и списка хакатонов
-class HackatonListApi(generics.GenericAPIView, 
+#получение хакатона по заданным фильтрам и списка хакатонов
+class HackatonListView(generics.GenericAPIView, 
                       mixins.CreateModelMixin, 
                       mixins.ListModelMixin):
+    permission_classes = [AllowAny,]
     serializer_class = HackatonSerializer
-    
+
     def get_queryset(self):
         queryset = Hackaton.objects.all()
         filter = {}
@@ -146,12 +147,19 @@ class HackatonListApi(generics.GenericAPIView,
             filter[i] = self.request.data[i]
         return queryset.filter(**filter)
     
+
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-    
+
+
+class HackatonCreateView(generics.GenericAPIView, 
+                         mixins.CreateModelMixin):
+    permission_classes = [IsAuthenticated,]
+    serializer_class = HackatonSerializer
+
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
-
+    
 
 class HackatonUrlInvite(APIView):
     permission_classes = [IsAuthenticated,]

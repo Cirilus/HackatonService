@@ -51,7 +51,7 @@ class ManagerUserTeam():
         return None
     
     def get_user_team(self, user, id_hackaton):
-        return ManagerUserTeam(user=user, id_hackaton=id_hackaton)
+        return ManagerUserTeam().check_team(user=user, id_hackaton=id_hackaton)
     
     def get_list_team(self, id_team):
         team = ManagerTeam().get_team_from_pk(id_team)
