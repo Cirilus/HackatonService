@@ -1,5 +1,5 @@
 from .models import Hackaton, Hackaton_User, Team, User_Team
-
+from .exceptions import NotFoundHackaton, NotFoundHackatonUser, NotFoundInvite, NotFoundTeam, NotFoundUserTeam
 
 class ManagerHackaton():
     def get_hackaton(self, id_hackaton):
@@ -18,12 +18,12 @@ class ManagerTeam():
         team = Team.objects.filter(pk=id_team).select_related('hackaton').first()
         return team
     
-    def get_team_from_owner(self, user, id_hackaton):
-        hackaton_user = ManagerHackatonUser().get_hackaton_user(user, id_hackaton)
-        if hackaton_user:
-            team = Team.objects.filter(owner=hackaton_user).first()
-            return team
-        return None
+    def get_team_from_owner(self, id_owner):
+        return Team.objects.filter(owner=id_owner).first()
+    
+    def delete_team(self, id_team):
+        User_Team.objects.filter(team=id_team).delete()
+        Team.objects.filter(pk=id_team).first().delete()
 
 
 class ManagerUserTeam():
@@ -35,7 +35,7 @@ class ManagerUserTeam():
                 return user_team
             user_team = User_Team.objects.filter(user=hackaton_user, is_invited=False).select_related('team').first()
             return user_team
-        return None
+        raise NotFoundHackatonUser('Не выполнена регистрация на хакатон')
 
     def get_active_invite(self, user, id_team):
         team = ManagerTeam().get_team_from_pk(id_team)
@@ -54,19 +54,28 @@ class ManagerUserTeam():
         return ManagerUserTeam().check_team(user=user, id_hackaton=id_hackaton)
     
     def get_list_team(self, id_team):
-        team = ManagerTeam().get_team_from_pk(id_team)
-        if team:
-            user_team = User_Team.objects.filter(team=team, is_invited=False).select_related('user')
-            return user_team
-        return None
+        user_team = User_Team.objects.filter(team=id_team, is_invited=False).select_related('user')
+        return user_team
     
-    def get_new_owner(self, user, id_hackaton):
-        user_team = ManagerUserTeam().get_user_team(user, id_hackaton)
-        if user_team is None:
-            return None
-        
-        list = ManagerUserTeam().get_list_team(user_team.team)
-        if len(list) < 2:
-            return None
-        return list[1]
+    def get_new_owner(self, id_team):
+        list = ManagerUserTeam().get_list_team(id_team)
+
+        if not len(list):
+            ManagerTeam().delete_team(id_team)
+        else:
+            team = ManagerTeam().get_team_from_pk(id_team)
+            team.owner = list[0].user
+            team.save()
+    
+    def delete_user_team(self, id_user_team):
+        User_Team.objects.filter(pk=id_user_team).first().delete()
+    
+    def delete_old_user_team(self, user, id_hackaton):
+        user_team = ManagerUserTeam().check_team(user=user, id_hackaton=id_hackaton)
+        if user_team:
+            team = user_team.team
+            ManagerUserTeam().delete_user_team(id_user_team=user_team.pk)
+
+            if team.owner == user_team.user:
+                ManagerUserTeam().get_new_owner()
         

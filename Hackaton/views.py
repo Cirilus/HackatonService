@@ -37,39 +37,15 @@ class HackatonUserView(APIView):
 
 class TeamView(APIView):
     permission_classes = [IsAuthenticated,]
-
+    #получить по id
     def get(self, request):
-        user_team = GetUserTeam().get_from_user(user=request.user.pk, 
-                                                id_hackaton=request.data.get('id_hackaton'))
-        
-        queryset = user_team.team
-        serializer = TeamSerializer(queryset)
-        return Response(status=200, data={'result':serializer.data})
+        response = GetTeam().get_team(request.data)
+        return response
 
     #создать команду
     def post(self, request):
-        user_hack = GetHackatonUser().get_from_user_hack(user=request.user.pk, 
-                                                        id_hackaton=request.data.get('id_hackaton'))
-            
-        DeleteUserTeam().leave_from_team(user=request.user.pk, 
-                                        id_hackaton=request.data.get('id_hackaton'))  
-            
-        request.data['owner'] = user_hack.pk
-        request.data['hackaton'] = request.data['id_hackaton']
-
-        serializer = TeamSerializer(data=request.data)   
-        serializer.is_valid(raise_exception=True) 
-        serializer.save()
-
-        request.data['team'] = serializer.data['id']
-        request.data['user'] = user_hack.pk
-        request.data['is_invited'] = False
-
-        serializer = UserTeamSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True) 
-        serializer.save()
-
-        return Response(status=200, data={'result':'success'})
+        response = GetTeam().create_team(user=request.user, data=request.data)
+        return response
 
 
 #получение списка своей команды по id хакатона
@@ -77,11 +53,8 @@ class MyTeamListView(APIView):
     permission_classes = [IsAuthenticated,]
     
     def get(self, request):
-        user = GetUserTeam().get_from_user(user=request.user.pk, id_hackaton=request.data.get('id_hackaton'))
-            
-        queryset = GetUserTeam().get_list_team(user.team.pk)
-        serializer_class = ListTeamSerializer(queryset, many=True)
-        return Response(status=200, data={'result':serializer_class.data})
+        response = GetTeam().get_my_team(user=request.user.pk, data=request.data)
+        return response
         
 
 #Приглашение в команду
@@ -90,29 +63,13 @@ class InviteTeamView(APIView):
     
     #дать инвайт
     def post(self, request):
-
-        team = GetTeam().get_from_owner_hack(request.user.pk, 
-                                            request.data.get('id_hackaton'))
-            
-        user = GetHackatonUser().get_user_hack_for_invite(request.data.get('user'), 
-                                                        request.data.get('id_hackaton'))
-
-        serializer = UserTeamSerializer(data={'user': user.pk, 'team':team.pk})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=200, data={'result':'success'})
+        response = GetUserTeam().create_invite(user=request.user, data=request.data)
+        return response
     
-    #принять инвайт
+    #принять инвайт 
     def update(self, request):
-        user_team = GetUserTeam().get_invited(team=request.data.get('team'), user=request.user.pk)
-        list_team = GetUserTeam().get_list_team(team=request.data.get('team'))
-        if len(list_team) >= 5:
-            return Response(status=404, data={'error':'Команда команда переполнена'})
-            
-        DeleteUserTeam.leave_from_team(user=request.user.pk, id_hackaton=user_team.user.hackaton.pk)
-        user_team.is_invited = False
-        user_team.save()
-        return Response(status=200, data={'result':'success'})
+        response = GetUserTeam().accept_invite(user=request.user, data=request.data)
+        return response
     
     #Выйти из команды
     def put(self, request):
@@ -126,14 +83,13 @@ class KickUserView(APIView):
 
     #Удалить юзера из команды
     def delete(self, request):
-        DeleteUserTeam().kick_user(user=request.data.get('user'), 
+        response = DeleteUserTeam().kick_user(user=request.data.get('user'), 
                          id_hackaton=request.data.get('id_hackaton'), 
-                         owner=request.user.pk)     
-        
-        return JsonResponse(status=200, data={'result':'success'})
+                         owner=request.user.pk)  
+        return response   
 
 
-#получение хакатона по заданным фильтрам и списка хакатонов
+#получение хакатонов по заданным фильтрам
 class HackatonListView(generics.GenericAPIView, 
                       mixins.CreateModelMixin, 
                       mixins.ListModelMixin):
@@ -165,27 +121,9 @@ class HackatonUrlInvite(APIView):
     permission_classes = [IsAuthenticated,]
 
     def post(self, request):
-        team = GetTeam().get_from_owner_hack(user=request.user, 
-                                             id_hackaton=request.data.get('id_hackaton')) 
-               
-        key = str(uuid.uuid4())
-        cache.set(key, team.pk, 10800)
-        return Response(status=200, data={'result':'http://127.0.0.1:8000/api/v1/hackaton/invite_url/?team=' + key})
+        response = GetUserTeam().create_invite_url(user=request.user, data=request.data)
+        return response
     
     def get(self, request):
-        token = request.GET.get('team')
-
-        id_team =  cache.get(token)
-        if id_team is None:
-            return Response(status=404, data={'error':'Приглашение в команду устарело'})
-
-        team = GetTeam().get_team(id_team)  
-        user_hack = GetHackatonUser().get_from_user_hack(user=request.user.pk, id_hackaton=team.hackaton.pk)
-
-        GetUserTeam().count_users_team(id_team)
-            
-        DeleteUserTeam().leave_from_team(user=request.user.pk, id_hackaton=team.hackaton.pk)
-        serializer = UserTeamSerializer(data={'user': user_hack.pk, 'team':team.pk, 'is_invited':False})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=200, data={'result':'success'})
+        response = GetUserTeam().accept_url_invite(user=request.user, key=request.GET.get('team'))
+        return response
