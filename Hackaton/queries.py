@@ -212,10 +212,34 @@ class GetUserTeam():
             return Response(status=405, data={'error':str(e)})
 
     def accept_url_invite(self, user, key):
-        id_team = cache.get(key)
-        if id_team is None:
-            return Response(status=404, data={'error':'Приглашение в команду устарело'})
-        return GetUserTeam().accept_invite(user=user, data={'team':id_team})
+        try:
+            id_team = cache.get(key)
+            if id_team is None:
+                return Response(status=404, data={'error':'Приглашение в команду устарело'})
+            list_team = ManagerUserTeam().get_list_team(id_team=id_team)
+            if len(list_team) >= 5:
+                raise TeamIsFull('Команда переполнена')
+            
+            team = ManagerTeam().get_team_from_pk(id_team=id_team)
+            user_hackaton = ManagerHackatonUser().get_hackaton_user(user=user, id_hackaton=team.hackaton)
+            ManagerUserTeam().delete_old_user_team(user=user, id_hackaton=team.hackaton)
+
+            data = {
+                'user': user_hackaton.pk,
+                'team': team.pk,
+                'is_invited': False
+            }
+
+            serializer = UserTeamSerializer(data=data)
+            serializer.is_valid(raise_exception=True) 
+            serializer.save()
+            return Response(status=200, data={'result':'success'})
+
+        except NotFoundInvite as e:
+            return Response(status=404, data={'error':str(e)})
+        except TeamIsFull as e:
+            return Response(status=405, data={'error':str(e)})
+        
 
     def count_users_team(self, id_team):
         list_team = GetUserTeam().get_list_team(id_team)
@@ -251,8 +275,8 @@ class DeleteUserTeam():
             user_team = ManagerUserTeam().get_user_team(user, id_hackaton)
             if user_team is None:
                 raise NotFoundUserTeam('Пользователь не найден')
-              
-            ManagerUserTeam().delete_user_team(user_team)
+            
+            ManagerUserTeam().delete_user_team(id_user_team=user_team.pk)
             return Response(status=200, data={'result':'success'})
         
         except NotFoundTeam as e:

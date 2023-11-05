@@ -77,5 +77,5 @@ class ManagerUserTeam():
             ManagerUserTeam().delete_user_team(id_user_team=user_team.pk)
 
             if team.owner == user_team.user:
-                ManagerUserTeam().get_new_owner()
+                ManagerUserTeam().get_new_owner(id_team=user_team.team)
         

@@ -127,3 +127,4 @@ class HackatonUrlInvite(APIView):
     def get(self, request):
         response = GetUserTeam().accept_url_invite(user=request.user, key=request.GET.get('team'))
         return response
+
