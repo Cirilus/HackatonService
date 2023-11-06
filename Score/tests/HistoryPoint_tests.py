@@ -134,24 +134,24 @@ class HistoryPoint_SerializersTestCase(TestCase):
         serialized_data = json.loads(json.dumps(serialized_data))
         expected_data = [
             {
-                'user_id': self.history_point_instance_1.user_id,
+                'user': self.history_point_instance_1.user_id,
                 'count': self.history_point_instance_1.count,
                 'id': self.history_point_instance_1.id,
-                'condition_id': self.history_point_instance_1.condition_id,
+                'condition': self.history_point_instance_1.condition_id,
                 'created' : self.history_point_instance_1.created,
             },
             {
-                'user_id': self.history_point_instance_2.user_id,
+                'user': self.history_point_instance_2.user_id,
                 'count': self.history_point_instance_2.count,
                 'id': self.history_point_instance_2.id,
-                'condition_id': self.history_point_instance_2.condition_id,
+                'condition': self.history_point_instance_2.condition_id,
                 'created': self.history_point_instance_2.created,
             },
             {
-                'user_id': self.history_point_instance_3.user_id,
+                'user': self.history_point_instance_3.user_id,
                 'count': self.history_point_instance_3.count,
                 'id': self.history_point_instance_3.id,
-                'condition_id': self.history_point_instance_3.condition_id,
+                'condition': self.history_point_instance_3.condition_id,
                 'created': self.history_point_instance_3.created,
             }
         ]

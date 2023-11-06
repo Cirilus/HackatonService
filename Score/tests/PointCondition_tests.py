@@ -17,11 +17,6 @@ class PointCondition_APITestCase(APITestCase):
         self.point_condition_instance_2 = PointCondition.objects.create(id=2, user_id=1, title='test2')
         self.point_condition_instance_3 = PointCondition.objects.create(id=3, user_id=1, title='test3')
 
-        # print(f"User: id={self.user_instance.id}, Username={self.user_instance.username}, Email={self.user_instance.email}")
-        # print(f"PointCondition 1: id={self.point_condition_instance_1.id}, user_id={self.point_condition_instance_1.user_id}, title={self.point_condition_instance_1.title}")
-        # print(f"PointCondition 2: id={self.point_condition_instance_2.id}, user_id={self.point_condition_instance_2.user_id}, title={self.point_condition_instance_2.title}")
-        # print('---------------------------------------------------', end='\n')
-
     def test_API_for_pointcondition_list(self):
         # тест получение всех записей || api/v1/pointconditionlist/
         url_list = reverse('pointcondition-list')
