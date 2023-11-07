@@ -1,18 +1,21 @@
 from django.test import TestCase
 from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
-from Score.models import HistoryPoint, PointCondition
-from django.contrib.auth.models import User # пока со стандартным пользователем связываемся
+from Score.models import PointCondition
+from django.contrib.auth.models import User  # пока со стандартным пользователем связываемся
 from rest_framework import status
-from Score.serializers import PointConditionSerializer, HistoryPointSerializer
+from Score.serializers import PointConditionSerializer
 import json
+
 
 class PointCondition_APITestCase(APITestCase):
     def setUp(self):
-        #тестовые данные
+        # тестовые данные
         self.client = APIClient()
 
-        self.user_instance = User.objects.create_user(id=1, username='test', password='test', email='test@test.com')
+        self.user_instance_1 = User.objects.create_user(id=1, username='test', password='test', email='test@test.com')
+        self.user_instance_2 = User.objects.create_user(id=2, username='test2', password='test2', email='test2@test.com')
+
         self.point_condition_instance_1 = PointCondition.objects.create(id=1, title='test1')
         self.point_condition_instance_2 = PointCondition.objects.create(id=2, user_id=1, title='test2')
         self.point_condition_instance_3 = PointCondition.objects.create(id=3, user_id=1, title='test3')
@@ -32,13 +35,12 @@ class PointCondition_APITestCase(APITestCase):
 
     def test_API_for_pointcondition_detail(self):
         # тест получения записи по собственному id || api/v1/pointconditionlist/<int:pk>
-        url_by_own_id = reverse('pointcondition-detail' , kwargs={'pk': self.point_condition_instance_1.id})
+        url_by_own_id = reverse('pointcondition-detail', kwargs={'pk': self.point_condition_instance_1.id})
         response = self.client.get(url_by_own_id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         serializer_data = PointConditionSerializer(self.point_condition_instance_1).data
         self.assertEqual(serializer_data, response.data)
-
 
         # api/v1/pointconditionlist/<int:pk>/ - для несуществуюшей записи. 404 должен возвращать???
         url_by_own_id = reverse('pointcondition-detail', kwargs={'pk': 4})
@@ -47,7 +49,7 @@ class PointCondition_APITestCase(APITestCase):
         self.assertEqual({"detail": "Not found."}, response.data)
 
     def test_API_for_pointcondition_byuserid(self):
-        #тест для получения записи или записей по user_id || api/v1/pointconditionlist/byuserid/<int:user_id> //
+        # тест для получения записи или записей по user_id || api/v1/pointconditionlist/byuserid/<int:user_id> //
         url_by_user_id = '/api/v1/pointconditionlist/byuserid/1/'
         response = self.client.get(url_by_user_id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -55,16 +57,59 @@ class PointCondition_APITestCase(APITestCase):
         count_of_records = PointCondition.objects.filter(user_id__isnull=False).count()
         self.assertEqual(count_of_records, len(response.data))
 
-        #или вот такая проверка, как лучше?????
+        # или вот такая проверка, как лучше?????
         records = PointCondition.objects.filter(user_id=1)
         serializer_data = PointConditionSerializer(records, many=True).data
         self.assertEqual(serializer_data, response.data)
 
         # тест для  получения несуществующей записи по user_id || api/v1/pointconditionlist/byuserid/<int:user_id> //
-        url_by_user_id = '/api/v1/pointconditionlist/byuserid/2/' # не существующий
+        url_by_user_id = '/api/v1/pointconditionlist/byuserid/2/'  # не существующий
         response = self.client.get(url_by_user_id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual([], response.data)
+        # (id=3, user_id=1, title='test3')
+
+    def test_create_pointcondition_by_own_id(self):
+        # тест добавление записи в модель pointcondtition|| api/v1/pointcondtitionlist/
+        data = {
+            'id': 4,
+            "user": 2,
+            "title": 'test4',
+        }
+
+        url = reverse("pointcondition-list")
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(PointCondition.objects.count(), 4)
+
+    def test_delete_pointcondition_by_own_id(self):
+        # Получаем URL для удаления historypoint по его ID || api/v1/pointcondtitionlist/
+        url_to_delete = reverse('pointcondition-detail', kwargs={'pk': self.point_condition_instance_2.id})
+
+        # отправляем DELETE-запрос на указанный URL
+        response = self.client.delete(url_to_delete)
+
+        # проверяем, что удаление прошло успешно (HTTP статус 204 No Content)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Убеждаемся, что запись больше не существует в базе данных
+        self.assertFalse(PointCondition.objects.filter(id=self.point_condition_instance_2.id).exists())
+        self.assertEqual(PointCondition.objects.count(), 2)
+
+    #
+    def test_update_pointcondition_by_own_id(self):
+        # Получаем URL для обновления резюме по его ID || api/v1/pointcondtitionlist/
+        url_to_update = reverse('pointcondition-detail', kwargs={'pk': self.point_condition_instance_2.id})
+
+        updated_data = {'title': 'викторина'}
+
+        # patch запрос на указанный URL с обновленными данными
+        response = self.client.patch(url_to_update, updated_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Перезагружаем запись
+        self.point_condition_instance_2.refresh_from_db()
+        self.assertEqual(self.point_condition_instance_2.title, updated_data['title'])
+
 
 class PointCondition_SerializersTestCase(TestCase):
     def setUp(self):
@@ -72,7 +117,6 @@ class PointCondition_SerializersTestCase(TestCase):
         self.point_condition_instance_1 = PointCondition.objects.create(id=1, title='test1')
         self.point_condition_instance_2 = PointCondition.objects.create(id=2, user_id=1, title='test2')
         self.point_condition_instance_3 = PointCondition.objects.create(id=3, user_id=1, title='test3')
-
 
     def test_serializer_for_pointcondition(self):
         data_for_test = PointCondition.objects.all()
