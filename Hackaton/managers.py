@@ -60,7 +60,7 @@ class ManagerUserTeam():
     def get_new_owner(self, id_team):
         list = ManagerUserTeam().get_list_team(id_team)
 
-        if not len(list):
+        if len(list) == 0:
             ManagerTeam().delete_team(id_team)
         else:
             team = ManagerTeam().get_team_from_pk(id_team)
@@ -77,5 +77,5 @@ class ManagerUserTeam():
             ManagerUserTeam().delete_user_team(id_user_team=user_team.pk)
 
             if team.owner == user_team.user:
-                ManagerUserTeam().get_new_owner(id_team=user_team.team)
+                ManagerUserTeam().get_new_owner(id_team=user_team.team.pk)
         

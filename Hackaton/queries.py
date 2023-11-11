@@ -38,8 +38,10 @@ class GetTeam():
             if queryset is None:
                 raise NotFoundTeam('команда не найдена')
             
-            serializer = TeamSerializer(queryset)
-            return Response(status=200, data={'result':serializer.data})
+            serializer1 = TeamSerializer(queryset)
+            queryset = ManagerUserTeam().get_list_team(id_team=data.get('team'))
+            serializer2 = ListTeamSerializer(queryset, many=True)
+            return Response(status=200, data={'result':{'list_team':serializer2.data, 'team':serializer1.data}})
         
         except NotFoundTeam as e:
             return Response(status=404, data={'error':str(e)})
@@ -55,8 +57,10 @@ class GetTeam():
                 raise NotFoundUserTeam('Вы не состоите в команде')
 
             queryset = ManagerUserTeam().get_list_team(id_team=user_team.team)
-            serializer_class = ListTeamSerializer(queryset, many=True)
-            return Response(status=200, data={'result':serializer_class.data})
+            serializer1 = ListTeamSerializer(queryset, many=True)
+            queryset = ManagerTeam().get_team_from_pk(user_team.team.pk)
+            serializer2 = TeamSerializer(queryset)
+            return Response(status=200, data={'result':{'team_list':serializer1.data, 'team':serializer2.data}})
 
         except NotFoundHackaton as e:
             return Response(status=404, data={'error':str(e)})
@@ -71,7 +75,7 @@ class GetTeam():
             if hackaton is None:
                 raise NotFoundHackaton('Хакатон не найден')
             
-            ManagerUserTeam().delete_old_user_team(user=user, id_hackaton=hackaton)
+            ManagerUserTeam().delete_old_user_team(user=user, id_hackaton=hackaton.pk)
             
             hackaton_user = ManagerHackatonUser().get_hackaton_user(user=user, id_hackaton=hackaton.pk)
             data['owner'] = hackaton_user.pk
@@ -124,7 +128,7 @@ class GetUserTeam():
         if user_team:
             return user_team
         return Response(status=404, data={'error':'Приглашение не найдено'})
-    
+
     def get_from_user(self, user, id_hackaton):
         try:
             user_hack = ManagerHackatonUser().get_hackaton_user(user=user, id_hackaton=id_hackaton)
@@ -157,7 +161,7 @@ class GetUserTeam():
 
             data['user'] = user_hackaton.pk
             data['team'] = team.pk
-            data['is_invited'] = False
+            data['is_invited'] = True
 
             serializer = UserTeamSerializer(data=data)
             serializer.is_valid(raise_exception=True) 

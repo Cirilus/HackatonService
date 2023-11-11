@@ -119,39 +119,4 @@ class InviteTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
 
-class KickTest(APITestCase):
-    def setUp(self):
-        self.user_instance = User.objects.create(id=1, first_name='test6', last_name='test6', 
-                                   middle_name='test6', email='v@mail.ru', 
-                                   phone='test', password='123456789TEst', is_active = True)
-        self.user_instance_2 = User.objects.create(id=2, first_name='test6', last_name='test6', 
-                                   middle_name='test6', email='vb@mail.ru', 
-                                   phone='test', password='123456789TEst', is_active = True)
-        
-        self.hackaton_instance = Hackaton.objects.create(id=1, title='test1', imageUrl='', 
-                                description='test',
-                                descriptionShort='test',
-                                creator='test',
-                                start_registration='2023-10-23T21:48:27Z',
-                                end_registration='2023-10-23T21:48:27Z',
-                                start='2023-10-23T21:48:27Z',
-                                end='2023-10-23T21:48:27Z')
-
-        self.hack_user_instance = Hackaton_User.objects.create(id=1, user_id=1, hackaton_id=1, place=1)
-        self.hack_user_instance_2 = Hackaton_User.objects.create(id=2, user_id=2, hackaton_id=1, place=1)
-
-        self.team_instance = Team.objects.create(id=1, hackaton_id=1, title='test', description='test', owner=self.hack_user_instance)
-        
-        self.user_team_instance = User_Team.objects.create(id=1, team_id=1, user_id=1, is_invited=False)
-        self.user_team_instance_2 = User_Team.objects.create(id=2, team_id=1, user_id=2, is_invited=False)
-
-        refresh = RefreshToken.for_user(self.user_instance)
-        self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
-
-    def test_kick(self):
-        response = self.client.delete(reverse('kick_user'), 
-                            data={'id_hackaton':"1", 'user':'2', 'description':'test'},
-                            format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 

@@ -9,12 +9,14 @@ class HackatonUserSerializer(serializers.ModelSerializer):
 
 
 class ListTeamSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.user.last_name')
+    id_hackaton_user = serializers.IntegerField(source='user.pk')
+    first_name = serializers.CharField(source='user.user.first_name')
+    last_name = serializers.CharField(source='user.user.last_name')
     email = serializers.CharField(source='user.user.email')
 
     class Meta:
         model = User_Team
-        fields = ('username', 'email')
+        fields = ('id_hackaton_user', 'first_name', 'last_name', 'email')
 
 
 class UserTeamSerializer(serializers.ModelSerializer):
@@ -33,3 +35,4 @@ class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
         fields = '__all__'
+
