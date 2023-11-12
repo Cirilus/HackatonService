@@ -44,8 +44,8 @@ INSTALLED_APPS = [
 
     'Authentication.apps.AuthenticationConfig',
     'Hackaton',
-    'users',
     'Resume',
+    'users',
 ]
 
 MIDDLEWARE = [
