@@ -20,7 +20,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework_simplejwt.views import TokenVerifyView, TokenObtainPairView, TokenRefreshView
-
+from Resume.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,7 +30,8 @@ urlpatterns = [
 
     path('api/v1/users/', include('users.urls')),
     path('api/v1/hackaton/', include('Hackaton.urls')),
-
+    path('', include('Resume.urls')), #resume
+    
     path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
