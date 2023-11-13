@@ -4,7 +4,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework_simplejwt.views import TokenVerifyView, TokenObtainPairView, TokenRefreshView
-from Hackaton.views import HackatonUserView, MyTeamListView, InviteTeamView, KickUserView, HackatonView
+from Hackaton.views import HackatonUserView, MyTeamListView, InviteTeamView, KickUserView
 from Resume.views import *
 
 
