@@ -13,7 +13,7 @@ class Command(BaseCommand):
             email = 'admin@admin.com'
             password = 'admin'
             print('Creating account for %s (%s)' % (username, email))
-            admin = User.objects.create_superuser(email=email, username=username, password=password)
+            admin = User.objects.create_superuser(email=email, password=password)
             admin.is_active = True
             admin.is_admin = True
             admin.save()
