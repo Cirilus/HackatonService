@@ -15,6 +15,7 @@ drf-spectacular = {extras = ["sidecar"], version = "^0.26.5"}
 gunicorn = "^21.2.0"
 djangorestframework-simplejwt = "^4.7.1"
 psycopg2-binary = "^2.9.9"
+pillow = "^10.1.0"
 
 
 [build-system]
