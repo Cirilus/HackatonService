@@ -9,36 +9,51 @@ from .serializers import ResumeSerializer, GraduationSerializer, EducationSerial
 
 from .models import Resume, Graduation, Education, Work, Contact, Hackatons
 
+
 @extend_schema(description="Resume URLs:", tags=["Resume"])
 class ResumeCRUD(viewsets.ModelViewSet):
-    # CRUD по собственному id
     permission_classes = [AllowAny, ]
     queryset = Resume.objects.all()
     serializer_class = ResumeSerializer
     lookup_field = 'pk'
 
-    def byuserid(self, request, user_id=None):
-        # CRUD по user_id
+    def get_queryset(self):
+        queryset = Resume.objects.all()
 
+        # Добавляем фильтрацию по полю 'visible' из параметров запроса
+        visible_param = self.request.query_params.get('visible')
+        if visible_param is not None:
+            visible_value = visible_param.lower() == 'true'
+            queryset = queryset.filter(visible=visible_value)
+
+        return queryset
+
+    def byuserid(self, request, user_id=None):
         self.lookup_field = 'user_id'
+
         if user_id not in Resume.objects.values_list('user', flat=True):
-            return Response({"error": "Резюме с таким user_id не существует."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": f"Резюме с таким user_id {user_id} не существует."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Добавляем фильтрацию по полю 'visible'
+        visible_param = request.query_params.get('visible')
+        if visible_param is not None:
+            visible_value = visible_param.lower() == 'true'
+            queryset = Resume.objects.filter(user_id=user_id, visible=visible_value)
+        else:
+            queryset = Resume.objects.filter(user_id=user_id)
 
         if request.method == 'DELETE':
-            queryset = Resume.objects.filter(user_id=user_id)
             queryset.delete()
             return Response({"message": f"Записи с user_id {user_id} удалены."}, status=status.HTTP_204_NO_CONTENT)
-
-
         elif request.method == 'PUT':
-            queryset = Resume.objects.get(user_id=user_id)
-            serializer = ResumeSerializer(queryset, data=request.data)
+            instance = queryset.first()
+            serializer = ResumeSerializer(instance, data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        queryset = Resume.objects.filter(user_id=user_id)
         serializer = ResumeSerializer(queryset, many=True)
         return Response(serializer.data)
 

@@ -21,7 +21,7 @@ class Resume_APITestCase(APITestCase):
                                                         email='test3@test.com')
 
         self.resume_instance_1 = Resume.objects.create(id=1, user_id=1, title='test1', description='test1')
-        self.resume_instance_2 = Resume.objects.create(id=2, user_id=2, title='test2', description='test2')
+        self.resume_instance_2 = Resume.objects.create(id=2, user_id=2, title='test2', description='test2', visible=False)
 
     def test_get_resume_list(self):
         # тест получение всех записей || api/v1/resumelist/
@@ -36,14 +36,53 @@ class Resume_APITestCase(APITestCase):
         serializer_data = ResumeSerializer(obj_from_DB, many=True).data
         self.assertEqual(serializer_data, response.data)
 
+        # тест получение всех записей || api/v1/resumelist/?visible=False
+        url_list = reverse('resume-list')
+        response = self.client.get(url_list, {'visible': 'False'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        count_of_records = Resume.objects.filter(visible=False).count()
+        self.assertEqual(len(response.data), count_of_records)
+
+        obj_from_DB = Resume.objects.filter(visible=False)
+        serializer_data = ResumeSerializer(obj_from_DB, many=True).data
+        self.assertEqual(serializer_data, response.data)
+
+        # тест получение всех записей || api/v1/resumelist/?visible=True
+        url_list = reverse('resume-list')
+        response = self.client.get(url_list, {'visible': 'True'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        count_of_records = Resume.objects.filter(visible=True).count()
+        self.assertEqual(len(response.data), count_of_records)
+
+        obj_from_DB = Resume.objects.filter(visible=True)
+        serializer_data = ResumeSerializer(obj_from_DB, many=True).data
+        self.assertEqual(serializer_data, response.data)
+
     def test_get_resume_by_id(self):
         # получение записи по id || api/v1/resumelist/<int: pk>/
         url_by_own_id = reverse('resume-detail', kwargs={'pk': self.resume_instance_1.id})
-        response = self.client.get(url_by_own_id)
+        response = self.client.get(url_by_own_id, )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         serializer_data = ResumeSerializer(self.resume_instance_1).data
         self.assertEqual(serializer_data, response.data)
+
+        # получение записи по id || api/v1/resumelist/<int: pk>/?visible=True
+        url_by_own_id = reverse('resume-detail', kwargs={'pk': self.resume_instance_1.id})
+        response = self.client.get(url_by_own_id, {'visible': 'True'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        serializer_data = ResumeSerializer(self.resume_instance_1).data
+        self.assertEqual(serializer_data, response.data)
+
+        # получение записи по id || api/v1/resumelist/<int: pk>/?visible=False (должен вернуть "detail": "Not found.") 404
+        url_by_own_id = reverse('resume-detail', kwargs={'pk': self.resume_instance_1.id})
+        response = self.client.get(url_by_own_id, {'visible': 'False'})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
 
         # api/v1/resumelist/<int:pk>/ - для несуществуюшей записи. 404 должен возвращать???
         url_by_own_id = reverse('resume-detail', kwargs={'pk': 4})
@@ -123,6 +162,24 @@ class Resumebyuserid_APITestCase(APITestCase):
         serializer_data = ResumeSerializer(records, many=True).data
         self.assertEqual(serializer_data, response.data)
 
+        # тест для получения записи или записей по user_id  || api/v1/resumelist/byuserid/<int: user_id>/?visible=True
+        url_by_user_id = '/api/v1/resumelist/byuserid/1/?visible=True'
+        response = self.client.get(url_by_user_id, {'visible': 'True'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        count_of_records = Resume.objects.filter(user_id=1).count()
+        self.assertEqual(count_of_records, len(response.data))
+
+        # тест для получения записи или записей по user_id  || api/v1/resumelist/byuserid/<int: user_id>/?visible=False
+        #должен вернуть пустой список
+        url_by_user_id = '/api/v1/resumelist/byuserid/1/?visible=False'
+        response = self.client.get(url_by_user_id, {'visible': 'False'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        records = Resume.objects.filter(user_id=1, visible=False)
+        serializer_data = ResumeSerializer(records, many=True).data
+        self.assertEqual(serializer_data, response.data)
+
         url_by_user_id = '/api/v1/resumelist/byuserid/2/'
         response = self.client.get(url_by_user_id)
         records = Resume.objects.filter(user_id=2)
@@ -133,7 +190,7 @@ class Resumebyuserid_APITestCase(APITestCase):
         url_by_user_id = '/api/v1/resumelist/byuserid/10/'  # не существующий
         response = self.client.get(url_by_user_id)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual({"error": "Резюме с таким user_id не существует."}, response.data)
+        self.assertEqual({"error": "Резюме с таким user_id 10 не существует."}, response.data)
 
     def test_delete_resume_by_userid(self):
         # получение записи по id ||api/v1/resumelist/byuserid/<int: user_id>/
@@ -169,7 +226,6 @@ class Resume_SerializersTestCase(TestCase):
         self.resume_instance_1 = Resume.objects.create(id=1, user_id=1, title='test1', description='test1')
         self.resume_instance_2 = Resume.objects.create(id=2, user_id=2, title='test2', description='test2')
 
-    # fields = ['user', 'title', 'description', 'visible', 'id']
     def test_serializer_for_resume(self):
         data_for_test = Resume.objects.all()
         serialized_data = ResumeSerializer(data_for_test, many=True).data

@@ -95,7 +95,6 @@ class Graduation_SerializersTestCase(TestCase):
         serialized_data = GraduationSerializer(data_for_test, many=True).data
         serialized_data = json.loads(json.dumps(serialized_data))
 
-        # мб захардкодить данные ?
         expected_data = [
             {
                 'title': self.graduation_instance_1.title,

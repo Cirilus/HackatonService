@@ -145,7 +145,7 @@ class Hackatons_SerializersTestCase(TestCase):
         data_for_test = Hackatons.objects.all()
         serialized_data = HackatonsSerializer(data_for_test, many=True).data
         serialized_data = json.loads(json.dumps(serialized_data))
-        # мб захардкодить данные ?
+
         expected_data = [
             {
                 'resume': self.hackatons_instance_1.resume_id,

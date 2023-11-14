@@ -131,7 +131,6 @@ class Contact_SerializersTestCase(TestCase):
         data_for_test = Contact.objects.all()
         serialized_data = ContactSerializer(data_for_test, many=True).data
         serialized_data = json.loads(json.dumps(serialized_data))
-        # мб захардкодить данные ?
         expected_data = [
             {
                 'resume': self.contact_instance_1.resume_id,

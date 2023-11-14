@@ -131,7 +131,7 @@ class Work_SerializersTestCase(TestCase):
         data_for_test = Work.objects.all()
         serialized_data = WorkSerializer(data_for_test, many=True).data
         serialized_data = json.loads(json.dumps(serialized_data))
-        # мб захардкодить данные ?
+
         expected_data = [
             {
                 'resume': self.work_instance_1.resume_id,

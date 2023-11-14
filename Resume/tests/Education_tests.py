@@ -119,7 +119,7 @@ class Education_SerializersTestCase(TestCase):
         self.user_instance_1 = User.objects.create_user(id=1, username='test', password='test', email='test@test.com')
         self.user_instance_2 = User.objects.create_user(id=2, username='test2', password='test2',
                                                         email='test2@test.com')
-        self.user_instance_2 = User.objects.create_user(id=3, username='test3', password='test3',
+        self.user_instance_3 = User.objects.create_user(id=3, username='test3', password='test3',
                                                         email='test3@test.com')
 
         self.graduation_instance_1 = Graduation.objects.create(id=1, title='Бакалавриат')
@@ -137,35 +137,32 @@ class Education_SerializersTestCase(TestCase):
         data_for_test = Education.objects.all()
         serialized_data = EducationSerializer(data_for_test, many=True).data
         serialized_data = json.loads(json.dumps(serialized_data))
-        # мб захардкодить данные ?
+
         expected_data = [
             {
                 'resume': self.education_instance_1.resume_id,
-                'title': self.education_instance_1.title,
-                'id': self.education_instance_1.id,
                 'graduation': self.education_instance_1.graduation_id,
+                'id': self.education_instance_1.id,
+                'title': self.education_instance_1.title,
                 'begin': self.education_instance_1.begin,
                 'end': self.education_instance_1.end,
-
             },
             {
                 'resume': self.education_instance_2.resume_id,
-                'title': self.education_instance_2.title,
-                'id': self.education_instance_2.id,
                 'graduation': self.education_instance_2.graduation_id,
+                'id': self.education_instance_2.id,
+                'title': self.education_instance_2.title,
                 'begin': self.education_instance_2.begin,
                 'end': self.education_instance_2.end,
-
             },
             {
                 'resume': self.education_instance_3.resume_id,
-                'title': self.education_instance_3.title,
-                'id': self.education_instance_3.id,
                 'graduation': self.education_instance_3.graduation_id,
+                'id': self.education_instance_3.id,
+                'title': self.education_instance_3.title,
                 'begin': self.education_instance_3.begin,
                 'end': self.education_instance_3.end,
-            }
+            },
 
         ]
-
         self.assertEqual(expected_data, serialized_data)
