@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Hackaton_User, User_Team, Hackaton
+from .models import Hackaton_User, User_Team, Hackaton, Team
 
 
 class HackatonUserSerializer(serializers.ModelSerializer):
@@ -9,15 +9,17 @@ class HackatonUserSerializer(serializers.ModelSerializer):
 
 
 class ListTeamSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.user.username')
+    id_hackaton_user = serializers.IntegerField(source='user.pk')
+    first_name = serializers.CharField(source='user.user.first_name')
+    last_name = serializers.CharField(source='user.user.last_name')
     email = serializers.CharField(source='user.user.email')
 
     class Meta:
         model = User_Team
-        fields = ('username', 'email')
+        fields = ('id_hackaton_user', 'first_name', 'last_name', 'email')
 
 
-class TeamSerializer(serializers.ModelSerializer):
+class UserTeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = User_Team
         fields = '__all__'
@@ -27,3 +29,10 @@ class HackatonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hackaton
         fields = '__all__'
+        
+
+class TeamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Team
+        fields = '__all__'
+

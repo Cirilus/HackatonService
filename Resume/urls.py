@@ -1,5 +1,4 @@
 
-
 """
 URL configuration for app project.
 

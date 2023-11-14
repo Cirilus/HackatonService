@@ -31,7 +31,7 @@ services:
         condition: service_healthy
     command: >
       bash -c "./manage.py collectstatic --noinput && 
-      ./manage.py makemigrations && 
+      ./manage.py makemigrations users Resume Hackaton&& 
       ./manage.py migrate && 
       ./manage.py initadmin && 
       gunicorn -b 0.0.0.0:8000 app.wsgi:application"
