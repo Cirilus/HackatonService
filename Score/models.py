@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User  # пока со стандартным пользователем связываемся
 import datetime
@@ -13,7 +14,7 @@ import datetime
 
 # Create your models here.
 class PointCondition(models.Model):  # таблица отвечает за то, при каком условии начислены очки
-    user = models.ForeignKey(User, on_delete=models.PROTECT, unique=False,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, unique=False,
                              related_name="PointConditionUserID", verbose_name='user_id',
                              null=True)  # to_field='можно свое указать'
     title = models.CharField(max_length=150, verbose_name="Условие для изменения количества очков Score")
@@ -27,7 +28,7 @@ class PointCondition(models.Model):  # таблица отвечает за то
 
 
 class HistoryPoint(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT, unique=False, related_name="HistoryPointUserID")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, unique=False, related_name="HistoryPointUserID")
     condition = models.ForeignKey(PointCondition, on_delete=models.CASCADE, null=False,
                                   verbose_name="condition_id", related_name="conditionID", unique=True)
 

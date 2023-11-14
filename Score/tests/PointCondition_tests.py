@@ -2,7 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
 from Score.models import PointCondition
-from django.contrib.auth.models import User  # пока со стандартным пользователем связываемся
+from users.models import User
 from rest_framework import status
 from Score.serializers import PointConditionSerializer
 import json
@@ -13,8 +13,15 @@ class PointCondition_APITestCase(APITestCase):
         # тестовые данные
         self.client = APIClient()
 
-        self.user_instance_1 = User.objects.create_user(id=1, username='test', password='test', email='test@test.com')
-        self.user_instance_2 = User.objects.create_user(id=2, username='test2', password='test2', email='test2@test.com')
+        self.user_instance_1 = User.objects.create(id=1, first_name='test1', last_name='test1',
+                                                   middle_name='test1', email='test1@test.ru',
+                                                   phone='test1', password='test1', is_active=True)
+        self.user_instance_2 = User.objects.create(id=2, first_name='test2', last_name='test2',
+                                                   middle_name='test2', email='test2@test.ru',
+                                                   phone='test2', password='test2', is_active=True)
+        self.user_instance_3 = User.objects.create(id=3, first_name='test3', last_name='test3',
+                                                   middle_name='test3', email='test3@test.ru',
+                                                   phone='test3', password='test3', is_active=True)
 
         self.point_condition_instance_1 = PointCondition.objects.create(id=1, title='test1')
         self.point_condition_instance_2 = PointCondition.objects.create(id=2, user_id=1, title='test2')
@@ -113,7 +120,15 @@ class PointCondition_APITestCase(APITestCase):
 
 class PointCondition_SerializersTestCase(TestCase):
     def setUp(self):
-        self.user_instance = User.objects.create_user(id=1, username='test', password='test', email='test@test.com')
+        self.user_instance_1 = User.objects.create(id=1, first_name='test1', last_name='test1',
+                                                   middle_name='test1', email='test1@test.ru',
+                                                   phone='test1', password='test1', is_active=True)
+        self.user_instance_2 = User.objects.create(id=2, first_name='test2', last_name='test2',
+                                                   middle_name='test2', email='test2@test.ru',
+                                                   phone='test2', password='test2', is_active=True)
+        self.user_instance_3 = User.objects.create(id=3, first_name='test3', last_name='test3',
+                                                   middle_name='test3', email='test3@test.ru',
+                                                   phone='test3', password='test3', is_active=True)
         self.point_condition_instance_1 = PointCondition.objects.create(id=1, title='test1')
         self.point_condition_instance_2 = PointCondition.objects.create(id=2, user_id=1, title='test2')
         self.point_condition_instance_3 = PointCondition.objects.create(id=3, user_id=1, title='test3')

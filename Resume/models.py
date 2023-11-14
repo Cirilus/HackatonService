@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from users.models import User
 
@@ -9,7 +10,7 @@ import datetime
 
 
 class Resume(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT, unique=True,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, unique=True,
                              related_name="resume")  # to_field='можно свое указать'
     title = models.CharField(max_length=150, verbose_name="Заголовок")
     description = models.TextField(verbose_name="Описание")
