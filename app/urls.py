@@ -22,6 +22,7 @@ from django.conf import settings
 from rest_framework_simplejwt.views import TokenVerifyView, TokenObtainPairView, TokenRefreshView
 from Resume.views import *
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -36,6 +37,7 @@ urlpatterns = [
     path('api/v1/users/', include('users.urls')),
     path('api/v1/hackaton/', include('Hackaton.urls')),
     path('', include('Resume.urls')), #resume
+    path('', include('Score.urls')), #score
 ]
 
 
