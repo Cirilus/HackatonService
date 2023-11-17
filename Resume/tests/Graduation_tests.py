@@ -14,9 +14,9 @@ class Graduation_APITestCase(APITestCase):
         # тестовые данные
         self.client = APIClient()
 
-        self.graduation_instance_1 = Graduation.objects.create(id=1, title='Бакалавриат')
-        self.graduation_instance_2 = Graduation.objects.create(id=2, title='Магистратура')
-        self.graduation_instance_3 = Graduation.objects.create(id=3, title='Аспирантура')
+        self.graduation_instance_1 = Graduation.objects.create(id=2, title='Бакалавриат')
+        self.graduation_instance_2 = Graduation.objects.create(id=3, title='Магистратура')
+        self.graduation_instance_3 = Graduation.objects.create(id=4, title='Аспирантура')
 
     def test_get_graduation_list(self):
         # тест получение всех записей || api/v1/graduationlist/
@@ -41,7 +41,7 @@ class Graduation_APITestCase(APITestCase):
         self.assertEqual(serializer_data, response.data)
 
         # api/v1/graduationlist/<int:pk>/ - для несуществуюшей записи. 404 должен возвращать???
-        url_by_own_id = reverse('graduation-detail', kwargs={'pk': 4})
+        url_by_own_id = reverse('graduation-detail', kwargs={'pk': 52})
         response = self.client.get(url_by_own_id)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({"detail": "Not found."}, response.data)
@@ -50,7 +50,7 @@ class Graduation_APITestCase(APITestCase):
         # тест добавление записи в модель graduation|| api/v1/graduationlist/
 
         data = {
-            'id': 4,
+            'id': 5,
             'title': 'Школа'
         }
 
@@ -61,7 +61,7 @@ class Graduation_APITestCase(APITestCase):
 
     def test_delete_graduation_by_own(self):
         # удаление записи по id ||api/v1/graduationlist/<int: pk>/
-        url_by_resume_id = url = reverse("graduation-detail", kwargs={'pk': 3})
+        url_by_resume_id = url = reverse("graduation-detail", kwargs={'pk': 4})
         response = self.client.delete(url_by_resume_id)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -70,7 +70,7 @@ class Graduation_APITestCase(APITestCase):
 
     def test_update_graduation_by_own_id(self):
         # обновление записи по id ||api/v1/graduationlist/<int: pk>/
-        url_by_resume_id = reverse("graduation-detail", kwargs={'pk': 3})
+        url_by_resume_id = reverse("graduation-detail", kwargs={'pk': 4})
         updated_data = {
             'title': 'Обновленное graduation',
         }

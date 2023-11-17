@@ -27,11 +27,11 @@ class WorkByResume_APITestCase(APITestCase):
 
         self.resume_instance_1 = Resume.objects.create(id=1, user_id=1, title='test1', description='test1')
         self.resume_instance_2 = Resume.objects.create(id=2, user_id=2, title='test2', description='test2')
-        self.resume_instance_2 = Resume.objects.create(id=3, user_id=3, title='test3', description='test3')
+        self.resume_instance_3 = Resume.objects.create(id=3, user_id=3, title='test3', description='test3')
 
-        self.work_instance_1 = Work.objects.create(id=1, resume_id=1, title='test1', description='test1')
-        self.work_instance_2 = Work.objects.create(id=2, resume_id=2, title='test2', description='test2')
-        self.work_instance_3 = Work.objects.create(id=3, resume_id=1, title='test3', description='test3')
+        self.work_instance_1 = Work.objects.create(id=2, resume_id=1, title='test1', description='test1')
+        self.work_instance_2 = Work.objects.create(id=3, resume_id=2, title='test2', description='test2')
+        self.work_instance_3 = Work.objects.create(id=4, resume_id=1, title='test3', description='test3')
 
     def test_get_work_list(self):
         # тест получение всех записей || api/v1/worklist/
@@ -56,7 +56,7 @@ class WorkByResume_APITestCase(APITestCase):
         self.assertEqual(serializer_data, response.data)
 
         # api/v1/worklist/<int:pk>/ - для несуществуюшей записи. 404 должен возвращать???
-        url_by_own_id = reverse('work-detail', kwargs={'pk': 4})
+        url_by_own_id = reverse('work-detail', kwargs={'pk': 7})
         response = self.client.get(url_by_own_id)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({"detail": "Not found."}, response.data)
@@ -80,7 +80,6 @@ class WorkByResume_APITestCase(APITestCase):
     def test_create_work(self):
         # тест добавление записи в модель work|| api/v1/worklist/
         data = {
-            'id': 4,
             "resume": 3,
             "title": "test4",
             'description': 'test4',
@@ -94,7 +93,7 @@ class WorkByResume_APITestCase(APITestCase):
     #
     def test_delete_work_by_own(self):
         # удаление записи по id ||api/v1/worklist/<int: pk>/
-        url_by_resume_id = url = reverse("work-detail", kwargs={'pk': 2})
+        url_by_resume_id = url = reverse("work-detail", kwargs={'pk': 3})
         response = self.client.delete(url_by_resume_id)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -104,7 +103,7 @@ class WorkByResume_APITestCase(APITestCase):
     #
     def test_update_work_by_own_id(self):
         # обновление записи по id ||api/v1/worklist/<int: pk>/
-        url_by_resume_id = reverse("work-detail", kwargs={'pk': 2})
+        url_by_resume_id = reverse("work-detail", kwargs={'pk': 3})
         updated_data = {'resume': 2, ''
                         'title': 'Обновленное work',
                         'description': 'Обновленное work'}
