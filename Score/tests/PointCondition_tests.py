@@ -23,9 +23,9 @@ class PointCondition_APITestCase(APITestCase):
                                                    middle_name='test3', email='test3@test.ru',
                                                    phone='test3', password='test3', is_active=True)
 
-        self.point_condition_instance_1 = PointCondition.objects.create(id=1, title='test1')
-        self.point_condition_instance_2 = PointCondition.objects.create(id=2, user_id=1, title='test2')
-        self.point_condition_instance_3 = PointCondition.objects.create(id=3, user_id=1, title='test3')
+        self.point_condition_instance_1 = PointCondition.objects.create(id=2, title='test1')
+        self.point_condition_instance_2 = PointCondition.objects.create(id=3, user_id=1, title='test2')
+        self.point_condition_instance_3 = PointCondition.objects.create(id=4, user_id=1, title='test3')
 
     def test_API_for_pointcondition_list(self):
         # тест получение всех записей || api/v1/pointconditionlist/
@@ -50,7 +50,7 @@ class PointCondition_APITestCase(APITestCase):
         self.assertEqual(serializer_data, response.data)
 
         # api/v1/pointconditionlist/<int:pk>/ - для несуществуюшей записи. 404 должен возвращать???
-        url_by_own_id = reverse('pointcondition-detail', kwargs={'pk': 4})
+        url_by_own_id = reverse('pointcondition-detail', kwargs={'pk': 25})
         response = self.client.get(url_by_own_id)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({"detail": "Not found."}, response.data)
@@ -79,7 +79,7 @@ class PointCondition_APITestCase(APITestCase):
     def test_create_pointcondition_by_own_id(self):
         # тест добавление записи в модель pointcondtition|| api/v1/pointcondtitionlist/
         data = {
-            'id': 4,
+            'id': 5,
             "user": 2,
             "title": 'test4',
         }
