@@ -24,8 +24,8 @@ class Resume_APITestCase(APITestCase):
                                                    middle_name='test3', email='test3@test.ru',
                                                    phone='test3', password='test3', is_active=True)
 
-        self.resume_instance_1 = Resume.objects.create(id=1, user_id=1, title='test1', description='test1')
-        self.resume_instance_2 = Resume.objects.create(id=2, user_id=2, title='test2', description='test2', visible=False)
+        self.resume_instance_1 = Resume.objects.create(user_id=1, title='test1', description='test1')
+        self.resume_instance_2 = Resume.objects.create(user_id=2, title='test2', description='test2', visible=False)
 
     def test_get_resume_list(self):
         # тест получение всех записей || api/v1/resumelist/
@@ -97,7 +97,6 @@ class Resume_APITestCase(APITestCase):
     def test_create_resume(self):
         # тест добавление записи в модель resume|| api/v1/resumelist/
         data = {
-            'id': 3,
             "user": 3,
             "title": "test3",
             'description': 'test3',

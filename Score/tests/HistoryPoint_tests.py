@@ -33,9 +33,9 @@ class HistoryPoint_APITestCase(APITestCase):
         self.point_condition_instance_3 = PointCondition.objects.create(id=3, user_id=2, title='test3')
         self.point_condition_instance_4 = PointCondition.objects.create(id=4, user_id=2, title='test4')
 
-        self.history_point_instance_1 = HistoryPoint.objects.create(id=1, user_id=1, condition_id=1, count=1, )
-        self.history_point_instance_2 = HistoryPoint.objects.create(id=2, user_id=2, condition_id=2, count=2, )
-        self.history_point_instance_3 = HistoryPoint.objects.create(id=3, user_id=2, condition_id=3, count=3, )
+        self.history_point_instance_1 = HistoryPoint.objects.create(id=2, user_id=1, condition_id=1, count=1, )
+        self.history_point_instance_2 = HistoryPoint.objects.create(id=3, user_id=2, condition_id=2, count=2, )
+        self.history_point_instance_3 = HistoryPoint.objects.create(id=4, user_id=2, condition_id=3, count=3, )
 
     def test_API_for_historypoint_list(self):
         # тест получение всех записей || api/v1/historypointlist/
@@ -120,7 +120,7 @@ class HistoryPoint_APITestCase(APITestCase):
     def test_create_historypoint_by_own_id(self):
         # тест добавление записи в модель historypoint|| api/v1/historypointlist/
         data = {
-            'id': 4,
+            'id': 5,
             "user": 2,
             "condition": 4,
             'count': 43,

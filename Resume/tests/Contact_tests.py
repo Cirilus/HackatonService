@@ -27,11 +27,11 @@ class ContactByResume_APITestCase(APITestCase):
 
         self.resume_instance_1 = Resume.objects.create(id=1, user_id=1, title='test1', description='test1')
         self.resume_instance_2 = Resume.objects.create(id=2, user_id=2, title='test2', description='test2')
-        self.resume_instance_2 = Resume.objects.create(id=3, user_id=3, title='test3', description='test3')
+        self.resume_instance_3 = Resume.objects.create(id=3, user_id=3, title='test3', description='test3')
 
-        self.contact_instance_1 = Contact.objects.create(id=1, resume_id=1, title='test1', body='test1')
-        self.contact_instance_2 = Contact.objects.create(id=2, resume_id=2, title='test3', body='test3')
-        self.contact_instance_3 = Contact.objects.create(id=3, resume_id=2, title='test3', body='test3')
+        self.contact_instance_1 = Contact.objects.create(id=2, resume_id=1, title='test1', body='test1')
+        self.contact_instance_2 = Contact.objects.create(id=3, resume_id=2, title='test3', body='test3')
+        self.contact_instance_3 = Contact.objects.create(id=4, resume_id=2, title='test3', body='test3')
 
     def test_get_contact_list(self):
         # тест получение всех записей || api/v1/contactlist/
@@ -56,7 +56,7 @@ class ContactByResume_APITestCase(APITestCase):
         self.assertEqual(serializer_data, response.data)
 
         # api/v1/contactlist/<int:pk>/ - для несуществуюшей записи. 404 должен возвращать???
-        url_by_own_id = reverse('contact-detail', kwargs={'pk': 4})
+        url_by_own_id = reverse('contact-detail', kwargs={'pk': 5})
         response = self.client.get(url_by_own_id)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({"detail": "Not found."}, response.data)
@@ -80,7 +80,7 @@ class ContactByResume_APITestCase(APITestCase):
     def test_create_contact(self):
         # тест добавление записи в модель contact|| api/v1/contactlist/
         data = {
-            'id': 4,
+            'id': 5,
             "resume": 2,
             "title": "test4",
             'body': 'test4',
@@ -93,7 +93,7 @@ class ContactByResume_APITestCase(APITestCase):
 
     def test_delete_contact_by_own(self):
         # удаление записи по id ||api/v1/contactlist/<int: pk>/
-        url_by_resume_id = url = reverse("contact-detail", kwargs={'pk': 1})
+        url_by_resume_id = url = reverse("contact-detail", kwargs={'pk': 2})
         response = self.client.delete(url_by_resume_id)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -102,7 +102,7 @@ class ContactByResume_APITestCase(APITestCase):
 
     def test_update_contact_by_own_id(self):
         # обновление записи по id ||api/v1/contactlist/<int: pk>/
-        url_by_resume_id = reverse("contact-detail", kwargs={'pk': 2})
+        url_by_resume_id = reverse("contact-detail", kwargs={'pk': 3})
         updated_data = {'resume': 3,
                         'title': 'Обновленное contact',
                         'body': 'Обновленное contact'}
