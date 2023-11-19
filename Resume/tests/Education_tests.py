@@ -2,7 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
 from Resume.models import Education, Resume, Graduation
-from django.contrib.auth.models import User  # пока со стандартным пользователем связываемся
+from users.models import User
 from rest_framework import status
 from Resume.serializers import EducationSerializer
 import json
@@ -14,22 +14,26 @@ class EducationByResume_APITestCase(APITestCase):
         # тестовые данные
         self.client = APIClient()
 
-        self.user_instance_1 = User.objects.create_user(id=1, username='test', password='test', email='test@test.com')
-        self.user_instance_2 = User.objects.create_user(id=2, username='test2', password='test2',
-                                                        email='test2@test.com')
-        self.user_instance_2 = User.objects.create_user(id=3, username='test3', password='test3',
-                                                        email='test3@test.com')
+        self.user_instance_1 = User.objects.create(id=1, first_name='test1', last_name='test1',
+                                                   middle_name='test1', email='test1@test.ru',
+                                                   phone='test1', password='test1', is_active=True)
+        self.user_instance_2 = User.objects.create(id=2, first_name='test2', last_name='test2',
+                                                   middle_name='test2', email='test2@test.ru',
+                                                   phone='test2', password='test2', is_active=True)
+        self.user_instance_3 = User.objects.create(id=3, first_name='test3', last_name='test3',
+                                                   middle_name='test3', email='test3@test.ru',
+                                                   phone='test3', password='test3', is_active=True)
 
         self.graduation_instance_1 = Graduation.objects.create(id=1, title='Бакалавриат')
         self.graduation_instance_2 = Graduation.objects.create(id=2, title='Магистратура')
 
         self.resume_instance_1 = Resume.objects.create(id=1, user_id=1, title='test1', description='test1')
         self.resume_instance_2 = Resume.objects.create(id=2, user_id=2, title='test2', description='test2')
-        self.resume_instance_2 = Resume.objects.create(id=3, user_id=3, title='test3', description='test3')
+        self.resume_instance_3 = Resume.objects.create(id=3, user_id=3, title='test3', description='test3')
 
-        self.education_instance_1 = Education.objects.create(id=1, graduation_id=1, resume_id=1, title='test1', )
-        self.education_instance_2 = Education.objects.create(id=2, graduation_id=2, resume_id=2, title='test3', )
-        self.education_instance_3 = Education.objects.create(id=3, graduation_id=2, resume_id=2, title='test3', )
+        self.education_instance_1 = Education.objects.create(id=2, graduation_id=1, resume_id=1, title='test1', )
+        self.education_instance_2 = Education.objects.create(id=3, graduation_id=2, resume_id=2, title='test3', )
+        self.education_instance_3 = Education.objects.create(id=4, graduation_id=2, resume_id=2, title='test3', )
 
     def test_get_education_list(self):
         # тест получение всех записей || api/v1/educationlist/
@@ -54,7 +58,7 @@ class EducationByResume_APITestCase(APITestCase):
         self.assertEqual(serializer_data, response.data)
 
         # api/v1/educationlist/<int:pk>/ - для несуществуюшей записи. 404 должен возвращать???
-        url_by_own_id = reverse('education-detail', kwargs={'pk': 4})
+        url_by_own_id = reverse('education-detail', kwargs={'pk': 52})
         response = self.client.get(url_by_own_id)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({"detail": "Not found."}, response.data)
@@ -78,7 +82,7 @@ class EducationByResume_APITestCase(APITestCase):
     def test_create_education(self):
         # тест добавление записи в модель education|| api/v1/educationlist/
         data = {
-            'id': 4,
+            'id': 5,
             "resume": 1,
             'graduation': 1,
             "title": "test4",
@@ -91,7 +95,7 @@ class EducationByResume_APITestCase(APITestCase):
 
     def test_delete_education_by_own(self):
         # удаление записи по id ||api/v1/educationlist/<int: pk>/
-        url_by_resume_id = url = reverse("education-detail", kwargs={'pk': 1})
+        url_by_resume_id = url = reverse("education-detail", kwargs={'pk': 2})
         response = self.client.delete(url_by_resume_id)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -100,7 +104,7 @@ class EducationByResume_APITestCase(APITestCase):
 
     def test_update_education_by_own_id(self):
         # обновление записи по id ||api/v1/educationlist/<int: pk>/
-        url_by_resume_id = reverse("education-detail", kwargs={'pk': 2})
+        url_by_resume_id = reverse("education-detail", kwargs={'pk': 3})
         updated_data = {'resume': 3,
                         'graduation': 1,
                         'title': 'Обновленное education',
@@ -116,11 +120,15 @@ class EducationByResume_APITestCase(APITestCase):
 
 class Education_SerializersTestCase(TestCase):
     def setUp(self):
-        self.user_instance_1 = User.objects.create_user(id=1, username='test', password='test', email='test@test.com')
-        self.user_instance_2 = User.objects.create_user(id=2, username='test2', password='test2',
-                                                        email='test2@test.com')
-        self.user_instance_3 = User.objects.create_user(id=3, username='test3', password='test3',
-                                                        email='test3@test.com')
+        self.user_instance_1 = User.objects.create(id=1, first_name='test1', last_name='test1',
+                                                   middle_name='test1', email='test1@test.ru',
+                                                   phone='test1', password='test1', is_active=True)
+        self.user_instance_2 = User.objects.create(id=2, first_name='test2', last_name='test2',
+                                                   middle_name='test2', email='test2@test.ru',
+                                                   phone='test2', password='test2', is_active=True)
+        self.user_instance_3 = User.objects.create(id=3, first_name='test3', last_name='test3',
+                                                   middle_name='test3', email='test3@test.ru',
+                                                   phone='test3', password='test3', is_active=True)
 
         self.graduation_instance_1 = Graduation.objects.create(id=1, title='Бакалавриат')
         self.graduation_instance_2 = Graduation.objects.create(id=2, title='Магистратура')
