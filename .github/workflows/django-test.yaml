@@ -1,0 +1,47 @@
+name: HackatonService Testing
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on: [push, pull_request]
+jobs:
+  run unittests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11',]
+    steps:
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install requirements
+        run: |
+            pip install poetry
+            poetry install
+      - name: Run tests
+        run: |
+            echo 'SECRET_KEY=dsadasidqjwirfjqpoifjasfnasfasd' > HackatonService/app/.env
+            echo 'DEBUG=false' > HackatonService/app/.env
+            echo 'DATABASE_NAME=postgres' > HackatonService/app/.env
+            echo 'DATABASE_USER=postgres' > HackatonService/app/.env
+            echo 'DATABASE_PASSWORD=postgres' > HackatonService/app/.env
+            echo 'DATABASE_HOST=localhost' > HackatonService/app/.env
+            echo 'DATABASE_PORT=5433' > HackatonService/app/.env
+          
+            echo 'DATABASE_NAME=postgres' > HackatonService/.env
+            echo 'DATABASE_USER=postgres' > HackatonService/.env
+            echo 'DATABASE_PASSWORD=postgres' > HackatonService/.env
+
+            docker-compose up -d postgres
+          
+            python manage.py test Resume.tests.Resume_tests
+            python manage.py test Resume.tests.Contact_tests
+            python manage.py test Resume.tests.Education_tests
+            python manage.py test Resume.tests.Graduation_tests
+            python manage.py test Resume.tests.Hackatons_tests
+            python manage.py test Resume.tests.Work_tests
+            python manage.py test Score.tests.HistoryPoint_tests
+            python manage.py test Score.tests.PointCondition_tests
+        # добавить тесты для users, hackaton
+

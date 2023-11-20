@@ -15,7 +15,7 @@ class GetHackatonsTest(APITestCase):
                                    middle_name='test6', email='v@mail.ru', 
                                    phone='test', password='123456789TEst', is_active = True)
 
-        self.hackaton_instance = Hackaton.objects.create(title='test1', imageUrl='', 
+        self.hackaton_instance = Hackaton.objects.create(title='test1', image_url='',
                                 description='test',
                                 descriptionShort='test',
                                 creator='test',
@@ -51,7 +51,7 @@ class TeamTest(APITestCase):
                                    middle_name='test6', email='vb@mail.ru', 
                                    phone='test', password='123456789TEst', is_active = True)
         
-        self.hackaton_instance = Hackaton.objects.create(id=1, title='test1', imageUrl='', 
+        self.hackaton_instance = Hackaton.objects.create(id=1, title='test1', image_url='',
                                 description='test',
                                 descriptionShort='test',
                                 creator='test',
@@ -86,7 +86,7 @@ class InviteTest(APITestCase):
                                    middle_name='test6', email='vb@mail.ru', 
                                    phone='test', password='123456789TEst', is_active = True)
         
-        self.hackaton_instance = Hackaton.objects.create(id=1, title='test1', imageUrl='', 
+        self.hackaton_instance = Hackaton.objects.create(id=1, title='test1', image_url='',
                                 description='test',
                                 descriptionShort='test',
                                 creator='test',

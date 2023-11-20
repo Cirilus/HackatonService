@@ -13,10 +13,12 @@ services:
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
       - POSTGRES_DB=${DATABASE_NAME}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    ports:
+      - "5433:5432"
 
   backend:
     build:
@@ -31,7 +33,7 @@ services:
         condition: service_healthy
     command: >
       bash -c "./manage.py collectstatic --noinput && 
-      ./manage.py makemigrations users Resume Hackaton&& 
+      ./manage.py makemigrations users Resume Hackaton Score&& 
       ./manage.py migrate && 
       ./manage.py initadmin && 
       gunicorn -b 0.0.0.0:8000 app.wsgi:application"
