@@ -36,6 +36,9 @@ jobs:
             echo 'DATABASE_NAME=postgres' > ./.env
             echo 'DATABASE_USER=postgres' >> ./.env
             echo 'DATABASE_PASSWORD=postgres' >> ./.env
+          
+            chmod +x setup_env.sh
+            ./setup_env.sh
 
             docker-compose up -d postgres
           
