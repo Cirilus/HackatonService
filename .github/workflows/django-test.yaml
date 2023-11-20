@@ -26,7 +26,7 @@ jobs:
       - name: Run tests
         run: |
             echo 'SECRET_KEY=dsadasidqjwirfjqpoifjasfnasfasd' > ./app/.env
-            echo 'DEBUG=false' >> HackatonService/app/.env
+            echo 'DEBUG=false' >> ./app/.env
             echo 'DATABASE_NAME=postgres' >> ./app/.env
             echo 'DATABASE_USER=postgres' >> ./app/.env
             echo 'DATABASE_PASSWORD=postgres' >> ./app/.env
