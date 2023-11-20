@@ -1,24 +1,28 @@
 name: HackatonService Testing
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+
 jobs:
   run_unittests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.11',]
+        python-version: ['3.11']
     steps:
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install requirements
+
+      - name: Install dependencies
         run: |
-            pip install poetry
-            poetry install
+          pip install poetry
+          poetry install
+
       - name: Run tests
         run: |
             echo 'SECRET_KEY=dsadasidqjwirfjqpoifjasfnasfasd' > ./app/.env
@@ -29,7 +33,7 @@ jobs:
             echo 'DATABASE_HOST=localhost' >> ./app/.env
             echo 'DATABASE_PORT=5433' >> ./app/.env
           
-            echo 'DATABASE_NAME=postgres' >> ./.env
+            echo 'DATABASE_NAME=postgres' > ./.env
             echo 'DATABASE_USER=postgres' >> ./.env
             echo 'DATABASE_PASSWORD=postgres' >> ./.env
 
@@ -43,5 +47,5 @@ jobs:
             python manage.py test Resume.tests.Work_tests
             python manage.py test Score.tests.HistoryPoint_tests
             python manage.py test Score.tests.PointCondition_tests
-        # добавить тесты для users, hackaton
 
+        # добавить тесты для users, hackaton
