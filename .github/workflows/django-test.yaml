@@ -2,13 +2,13 @@ name: HackatonService Testing
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push, pull_request]
 jobs:
-  run unittests:
+  run_unittests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.11',]
     steps:
-
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Setup Python ${{ matrix.python-version }}
@@ -21,17 +21,17 @@ jobs:
             poetry install
       - name: Run tests
         run: |
-            echo 'SECRET_KEY=dsadasidqjwirfjqpoifjasfnasfasd' > HackatonService/app/.env
-            echo 'DEBUG=false' > HackatonService/app/.env
-            echo 'DATABASE_NAME=postgres' > HackatonService/app/.env
-            echo 'DATABASE_USER=postgres' > HackatonService/app/.env
-            echo 'DATABASE_PASSWORD=postgres' > HackatonService/app/.env
-            echo 'DATABASE_HOST=localhost' > HackatonService/app/.env
-            echo 'DATABASE_PORT=5433' > HackatonService/app/.env
+            echo 'SECRET_KEY=dsadasidqjwirfjqpoifjasfnasfasd' > ./app/.env
+            echo 'DEBUG=false' >> HackatonService/app/.env
+            echo 'DATABASE_NAME=postgres' >> ./app/.env
+            echo 'DATABASE_USER=postgres' >> ./app/.env
+            echo 'DATABASE_PASSWORD=postgres' >> ./app/.env
+            echo 'DATABASE_HOST=localhost' >> ./app/.env
+            echo 'DATABASE_PORT=5433' >> ./app/.env
           
-            echo 'DATABASE_NAME=postgres' > HackatonService/.env
-            echo 'DATABASE_USER=postgres' > HackatonService/.env
-            echo 'DATABASE_PASSWORD=postgres' > HackatonService/.env
+            echo 'DATABASE_NAME=postgres' >> ./.env
+            echo 'DATABASE_USER=postgres' >> ./.env
+            echo 'DATABASE_PASSWORD=postgres' >> ./.env
 
             docker-compose up -d postgres
           
