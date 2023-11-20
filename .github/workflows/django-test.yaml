@@ -23,22 +23,21 @@ jobs:
           pip install poetry
           poetry install
 
-      - name: Set up environment variables
+      - name: Set up environment variables and start PostgreSQL
         run: |
           echo 'SECRET_KEY=dsadasidqjwirfjqpoifjasfnasfasd' > HackatonService/app/.env
-          echo 'DEBUG=false' > HackatonService/app/.env
-          echo 'DATABASE_NAME=postgres' > HackatonService/app/.env
-          echo 'DATABASE_USER=postgres' > HackatonService/app/.env
-          echo 'DATABASE_PASSWORD=postgres' > HackatonService/app/.env
-          echo 'DATABASE_HOST=localhost' > HackatonService/app/.env
-          echo 'DATABASE_PORT=5433' > HackatonService/app/.env
+          echo 'DEBUG=false' >> HackatonService/app/.env
+          echo 'DATABASE_NAME=postgres' >> HackatonService/app/.env
+          echo 'DATABASE_USER=postgres' >> HackatonService/app/.env
+          echo 'DATABASE_PASSWORD=postgres' >> HackatonService/app/.env
+          echo 'DATABASE_HOST=localhost' >> HackatonService/app/.env
+          echo 'DATABASE_PORT=5433' >> HackatonService/app/.env
           
           echo 'DATABASE_NAME=postgres' > HackatonService/.env
-          echo 'DATABASE_USER=postgres' > HackatonService/.env
-          echo 'DATABASE_PASSWORD=postgres' > HackatonService/.env
-
-      - name: Start PostgreSQL container
-        run: docker-compose up -d postgres
+          echo 'DATABASE_USER=postgres' >> HackatonService/.env
+          echo 'DATABASE_PASSWORD=postgres' >> HackatonService/.env
+          
+          docker-compose up -d postgres
 
       - name: Run tests
         run: |
