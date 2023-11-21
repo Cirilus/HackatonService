@@ -47,20 +47,17 @@ jobs:
           pip install poetry
           poetry install
 
-      - name: migrations
-        run: |
           python manage.py makemigrations
           python manage.py migrate
-      - name: Run tests
-        run: |
 
-            python manage.py test Resume.tests.Resume_tests
-            python manage.py test Resume.tests.Contact_tests
-            python manage.py test Resume.tests.Education_tests
-            python manage.py test Resume.tests.Graduation_tests
-            python manage.py test Resume.tests.Hackatons_tests
-            python manage.py test Resume.tests.Work_tests
-            python manage.py test Score.tests.HistoryPoint_tests
-            python manage.py test Score.tests.PointCondition_tests
+
+          python manage.py test Resume.tests.Resume_tests
+          python manage.py test Resume.tests.Contact_tests
+          python manage.py test Resume.tests.Education_tests
+          python manage.py test Resume.tests.Graduation_tests
+          python manage.py test Resume.tests.Hackatons_tests
+          python manage.py test Resume.tests.Work_tests
+          python manage.py test Score.tests.HistoryPoint_tests
+          python manage.py test Score.tests.PointCondition_tests
 
         # добавить тесты для users, hackaton
