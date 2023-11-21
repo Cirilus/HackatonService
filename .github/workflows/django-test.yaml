@@ -1,14 +1,30 @@
 name: HackatonService Testing
 on:
   push:
+    branches:
+      - master
+      - test_dev
+
   pull_request:
+    branches:
+      - master
+      - test_dev
 
 jobs:
   run_unittests:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     strategy:
       matrix:
         python-version: ['3.11']
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,28 +36,17 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install poetry
           poetry install
 
+      - name: migrations
+        run: |
+          python manage.py makemigrations
+          python manage.py migrate
       - name: Run tests
         run: |
-            echo 'SECRET_KEY=dsadasidqjwirfjqpoifjasfnasfasd' > ./app/.env
-            echo 'DEBUG=false' >> ./app/.env
-            echo 'DATABASE_NAME=postgres' >> ./app/.env
-            echo 'DATABASE_USER=postgres' >> ./app/.env
-            echo 'DATABASE_PASSWORD=postgres' >> ./app/.env
-            echo 'DATABASE_HOST=localhost' >> ./app/.env
-            echo 'DATABASE_PORT=5433' >> ./app/.env
-          
-            echo 'DATABASE_NAME=postgres' > ./.env
-            echo 'DATABASE_USER=postgres' >> ./.env
-            echo 'DATABASE_PASSWORD=postgres' >> ./.env
-          
-            chmod +x setup_env.sh
-            ./setup_env.sh
 
-            docker-compose up -d postgres
-          
             python manage.py test Resume.tests.Resume_tests
             python manage.py test Resume.tests.Contact_tests
             python manage.py test Resume.tests.Education_tests

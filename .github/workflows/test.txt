@@ -1,0 +1,9 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+триггер - пуш в мастер + пул реквест из любой ветки
