@@ -8,7 +8,7 @@ from django.core.validators import FileExtensionValidator
 
 class Hackaton(models.Model):
     title = models.CharField(max_length=150)
-    imageUrl = models.ImageField(upload_to='hackatons/')
+    image_url = models.ImageField(upload_to='hackatons/')
     description = models.TextField()
     descriptionShort = models.TextField()
     creator = models.CharField(max_length=150)
@@ -19,16 +19,16 @@ class Hackaton(models.Model):
     end = models.DateTimeField()
 
     tracks = ArrayField(models.CharField(max_length=150), default=list)
-    grandPrize = models.CharField(max_length=150, blank=True)
+    grand_prize = models.CharField(max_length=150, blank=True)
     roles = ArrayField(models.CharField(max_length=150), default=list)
     location = models.CharField(max_length=150, blank=True)
-    isOnline = models.BooleanField(default=True)
+    is_online = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title + " " + self.creator
     
     def clean(self):
-        if self.imageUrl.size > 3 * 1024 * 1024 * 8:
+        if self.image_url.size > 3 * 1024 * 1024 * 8:
             raise ValidationError('image size is too large')
     
 

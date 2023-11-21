@@ -1,23 +1,17 @@
-from django.shortcuts import render, get_object_or_404
+
 from users.models import User
-from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework import generics, mixins, filters
 from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet
 from .serializers import HackatonUserSerializer, ListTeamSerializer, UserTeamSerializer, HackatonSerializer, TeamSerializer
 from rest_framework.response import Response
-from django.http import JsonResponse
 from django.forms.models import model_to_dict
 from .models import User_Team, Team, Hackaton_User, Hackaton
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from .queries import GetHackaton, GetHackatonUser, GetTeam, GetUserTeam, DeleteUserTeam
 import jwt
-from app.settings import ALLOWED_HOSTS
-from .exceptions import NotFoundHackaton, NotFoundHackatonUser, NotFoundTeam, NotFoundUserTeam, NotFoundInvite, TeamIsFull
 from django.core.cache import cache
 import uuid
-from rest_framework.decorators import action, permission_classes, api_view
-from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse, OpenApiRequest
 from drf_spectacular.types import OpenApiTypes
 
