@@ -205,8 +205,11 @@ class HackatonCreateView(generics.GenericAPIView,
     permission_classes = [IsAuthenticated,]
     serializer_class = HackatonSerializer
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+    def post(self, request):
+        serializer = HackatonSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=200, data={'result': 'заебца'})
     
 
 @extend_schema(tags=['Invite in team'])
