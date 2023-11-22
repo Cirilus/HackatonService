@@ -216,7 +216,7 @@ class HackatonCreateView(generics.GenericAPIView,
         serializer = HackatonSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=200, data={'result': 'заебца'})
+        return Response(status=200, data={'result': 'success'})
     
 
 @extend_schema(tags=['Invite in team'])
