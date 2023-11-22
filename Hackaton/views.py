@@ -2,7 +2,7 @@
 from users.models import User
 from rest_framework.views import APIView
 from rest_framework import generics, mixins, filters
-from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet, ModelViewSet
 from .serializers import HackatonUserSerializer, ListTeamSerializer, UserTeamSerializer, HackatonSerializer, TeamSerializer
 from rest_framework.response import Response
 from django.forms.models import model_to_dict
@@ -174,10 +174,12 @@ class KickUserView(APIView):
         responses={200: HackatonSerializer, 404: OpenApiTypes.OBJECT},
         examples=[OpenApiExample(name='Example get team', value={'error': 'message'}, response_only=True, status_codes=[404]),],
     )
-class HackatonListView(generics.GenericAPIView, 
-                      mixins.CreateModelMixin, 
-                      mixins.ListModelMixin):
+class HackatonListView(ViewSet, 
+                       generics.GenericAPIView,
+                       mixins.ListModelMixin):
+    
     permission_classes = [AllowAny,]
+    queryset = Hackaton.objects.all()
     serializer_class = HackatonSerializer
 
     def get_queryset(self):
@@ -190,6 +192,11 @@ class HackatonListView(generics.GenericAPIView,
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+
+    def get_locations(self, request):
+        locations = Hackaton.objects.values('location').distinct()
+        return Response(status=200, data={'result':locations})
+
 
 @extend_schema(
         tags=["Hackaton Views"],
