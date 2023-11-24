@@ -8,9 +8,9 @@ from django.core.validators import FileExtensionValidator
 
 class Hackaton(models.Model):
     title = models.CharField(max_length=150)
-    image_url = models.ImageField(upload_to='hackatons/')
+    image_url = models.FileField(upload_to='hackatons/')
     description = models.TextField()
-    descriptionShort = models.TextField()
+    description_short = models.TextField()
     creator = models.CharField(max_length=150)
 
     start_registration = models.DateTimeField(default=datetime.datetime.now)

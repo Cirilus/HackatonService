@@ -8,5 +8,6 @@ router_user.register(r'userlist', UserViewSet)
 
 
 urlpatterns = [
-    path('action_user/', include(router_user.urls)),
+    path('', include(router_user.urls)),
+    path('my_profile/', UserViewSet.as_view({'get':'my_profile'}))
 ]
