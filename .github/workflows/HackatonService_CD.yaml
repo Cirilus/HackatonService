@@ -1,0 +1,24 @@
+name: Deploy to VPS
+run-name: Deploy changes by ${{ github.actor }} on prod
+
+on:
+  push:
+    branches:
+      - master
+#      - CI_CD
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: 94.154.11.47
+        username: root
+        password: 4xKFrr47v3Ilf6T3CP
+        port: 22
+        script: |
+          cd HackatonService && git pull origin master && docker-compose up--build -d
+          

@@ -156,3 +156,9 @@ class GraduationCRUD(viewsets.ModelViewSet):
     permission_classes = [AllowAny, ]
     queryset = Graduation.objects.all()
     serializer_class = GraduationSerializer
+
+
+from django.http import JsonResponse
+
+def cd_test_endpoint(request):
+    return JsonResponse({'cd_test': 'ok'})

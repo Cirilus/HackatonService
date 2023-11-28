@@ -7,12 +7,12 @@ on:
   push:
     branches:
       - master
-      - fix_postgres
+      - CI_CD
 
   pull_request:
     branches:
       - master
-      - fix_postgres
+      - CI_CD
 
 jobs:
   run_CI:
