@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - master
-      - CI_CD
+#      - CI_CD
 
 jobs:
   build:
@@ -20,9 +20,5 @@ jobs:
         password: 4xKFrr47v3Ilf6T3CP
         port: 22
         script: |
-          whoami
-          echo "Hello from GitHub Actions!"
-          echo "Hostname: $HOSTNAME"
-          echo "Current directory: $(pwd)"
-          echo "Files in current directory:"
-          ls -al
+          cd HackatonService && git pull origin master && docker-compose up--build -d
+          
