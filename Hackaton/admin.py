@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Hackaton, Hackaton_User, Team, User_Team
+from .models import Hackaton, Hackaton_User, Team, User_Team, JoinRequest
 
 
 class HackatonAdmin(admin.ModelAdmin):
@@ -19,3 +19,4 @@ admin.site.register(Hackaton, HackatonAdmin)
 admin.site.register(Hackaton_User, HackatonUserAdmin)
 admin.site.register(Team)
 admin.site.register(User_Team, UserTeamAdmin)
+admin.site.register(JoinRequest)

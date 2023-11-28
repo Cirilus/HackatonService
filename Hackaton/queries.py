@@ -1,9 +1,9 @@
 from .models import Hackaton_User, User_Team, Team, Hackaton
-from .serializers import TeamSerializer, UserTeamSerializer, ListTeamSerializer
+from .serializers import TeamSerializer, UserTeamSerializer, ListTeamSerializer, JoinRequestSerializer
 from rest_framework.response import Response
 from rest_framework import status
-from .exceptions import NotFoundHackaton, NotFoundHackatonUser, NotFoundTeam, NotFoundUserTeam, NotFoundInvite, TeamIsFull
-from .managers import ManagerHackaton, ManagerHackatonUser, ManagerTeam, ManagerUserTeam
+from .exceptions import NotFoundHackaton, NotFoundHackatonUser, NotFoundTeam, NotFoundUserTeam, NotFoundInvite, TeamIsFull, NotFoundJoinRequest
+from .managers import ManagerHackaton, ManagerHackatonUser, ManagerTeam, ManagerUserTeam, ManagerJoinRequest
 import uuid
 from django.core.cache import cache
 
@@ -103,7 +103,7 @@ class GetTeam():
         try:
             owner = ManagerHackatonUser().get_hackaton_user(user, id_hackaton)
             if owner is None:
-                raise NotFoundHackatonUser
+                raise NotFoundHackatonUser('')
             
             team = ManagerTeam().get_team_from_owner(user, id_hackaton)
             if team is None:
@@ -291,3 +291,68 @@ class DeleteUserTeam():
             return Response(status=404, data={'error':str(e)})
 
 
+class QueriesJoinRequest():
+    def filter_requests(self, user, id_hackaton):
+        hack_user = ManagerHackatonUser().get_hackaton_user(user=user, id_hackaton=id_hackaton)
+        team = ManagerTeam().get_team_from_owner(id_owner=hack_user.pk)
+        requests = ManagerJoinRequest().get_list_requests(id_team=team.pk).filter(status='pending')
+        return requests
+
+    def create_join_request(self, user, team):
+        try:
+            data = {}
+            team = ManagerTeam().get_team_from_pk(id_team=team)
+            if team is None:
+                raise NotFoundTeam('Команда не найдена')
+            data['team'] = team.pk
+
+            hack_user = ManagerHackatonUser().get_hackaton_user(user=user, id_hackaton=team.hackaton)
+            if hack_user is None:
+                raise NotFoundHackatonUser('Вы не зарегистрированы на хакатон')
+            data['user'] = hack_user.pk
+
+            invite = ManagerUserTeam().get_active_invite(user=user, id_team=team.pk)
+            if invite is None:
+                serializer = JoinRequestSerializer(data=data)
+                serializer.is_valid(raise_exception=True) 
+                serializer.save()
+                return Response(status=200, data={'result':'success'})
+            
+            return GetUserTeam().accept_invite(user=user, data={'team':team.pk})
+        
+        except NotFoundTeam as e:
+            return Response(status=404, data={'error':str(e)})
+        except NotFoundHackatonUser as e:
+            return Response(status=404, data={'error':str(e)})
+    
+    def answer_request(self, user, id_join, answer):
+        try:
+            statuses = {'True':'accept',
+                        'False':'decline'}
+            join_request = ManagerJoinRequest().get_request(pk=id_join)
+            if join_request is None:
+                raise NotFoundJoinRequest('Запрос не найден')
+            
+            owner = ManagerHackatonUser().get_hackaton_user(user=user, id_hackaton=join_request.team.hackaton.pk)
+            if owner is None or join_request.team.owner.pk != owner.pk:
+                raise NotFoundHackatonUser('Вы не создатель команды')
+            
+            join_request.status = statuses[answer]
+            join_request.save()
+
+            list_team = ManagerUserTeam().get_list_team(id_team=join_request.team)
+            if join_request.status == 'accept' and len(list_team) < 5:
+                print('принят в команду')
+                serializer_user_team = UserTeamSerializer(data={'user':join_request.user.pk,
+                                                                'team':join_request.team.pk,
+                                                                'is_invited':False})
+                serializer_user_team.is_valid(raise_exception=True)
+                serializer_user_team.save()
+            else:
+                print('не принят в команду')
+            return Response(status=200, data={'result':'success'})
+        
+        except NotFoundJoinRequest as e:
+            return Response(status=404, data={'error':str(e)})
+        except NotFoundHackatonUser as e:
+            return Response(status=404, data={'error':str(e)})
