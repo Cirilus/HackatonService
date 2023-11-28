@@ -1,4 +1,5 @@
 name: Deploy to VPS
+run-name: Deploy changes by ${{ github.actor }} on prod
 
 on:
   push:
@@ -18,4 +19,6 @@ jobs:
         username: root
         password: 4xKFrr47v3Ilf6T3CP
         port: 22
-        script: whoami
+        script: |
+          whoami
+          echo "Hello from GitHub Actions!"
