@@ -1,29 +1,32 @@
-class NotFoundHackaton(Exception):
+class BaseException(Exception):
     def __init__(self, text):
         self.text = text
         super().__init__(text)
 
-class NotFoundHackatonUser(Exception):
-    def __init__(self, text):
-        self.text = text
-        super().__init__(text)
 
-class NotFoundTeam(Exception):
-    def __init__(self, text):
-        self.text = text
-        super().__init__(text)
+class NotFoundHackaton(BaseException):
+    pass
 
-class NotFoundUserTeam(Exception):
-    def __init__(self, text):
-        self.text = text
-        super().__init__(text)
 
-class NotFoundInvite(Exception):
-    def __init__(self, text):
-        self.text = text
-        super().__init__(text)
+class NotFoundHackatonUser(BaseException):
+    pass
 
-class TeamIsFull(Exception):
-    def __init__(self, text):
-        self.text = text
-        super().__init__(text)
+
+class NotFoundTeam(BaseException):
+    pass
+
+
+class NotFoundUserTeam(BaseException):
+    pass
+
+
+class NotFoundInvite(BaseException):
+    pass
+
+
+class TeamIsFull(BaseException):
+    pass
+
+
+class NotFoundJoinRequest(BaseException):
+    pass

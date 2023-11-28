@@ -1,4 +1,4 @@
-from .models import Hackaton, Hackaton_User, Team, User_Team
+from .models import Hackaton, Hackaton_User, Team, User_Team, JoinRequest
 from .exceptions import NotFoundHackaton, NotFoundHackatonUser, NotFoundInvite, NotFoundTeam, NotFoundUserTeam
 
 class ManagerHackaton():
@@ -22,7 +22,9 @@ class ManagerTeam():
         return Team.objects.filter(owner=id_owner).first()
     
     def delete_team(self, id_team):
-        User_Team.objects.filter(team=id_team).delete()
+        users = User_Team.objects.filter(team=id_team)
+        if users:
+            users.delete()
         Team.objects.filter(pk=id_team).first().delete()
 
 
@@ -78,4 +80,12 @@ class ManagerUserTeam():
 
             if team.owner == user_team.user:
                 ManagerUserTeam().get_new_owner(id_team=user_team.team.pk)
+
+class ManagerJoinRequest():
+    def get_request(self, pk):
+        return JoinRequest.objects.filter(pk=pk).first()
+    
+    def get_list_requests(self, id_team):
+        return JoinRequest.objects.filter(team=id_team)
+
         

@@ -3,12 +3,13 @@ from users.models import User
 from rest_framework.views import APIView
 from rest_framework import generics, mixins, filters
 from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet, ModelViewSet
-from .serializers import HackatonUserSerializer, ListTeamSerializer, UserTeamSerializer, HackatonSerializer, TeamSerializer
+from .serializers import HackatonUserSerializer, ListTeamSerializer, UserTeamSerializer, HackatonSerializer, TeamSerializer, JoinRequestSerializer
 from rest_framework.response import Response
 from django.forms.models import model_to_dict
-from .models import User_Team, Team, Hackaton_User, Hackaton
+from .models import User_Team, Team, Hackaton_User, Hackaton, JoinRequest
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
-from .queries import GetHackaton, GetHackatonUser, GetTeam, GetUserTeam, DeleteUserTeam
+from .queries import GetHackaton, GetHackatonUser, GetTeam, GetUserTeam, DeleteUserTeam, QueriesJoinRequest
+from .managers import ManagerTeam
 import jwt
 from django.core.cache import cache
 import uuid
@@ -41,7 +42,7 @@ class HackatonUserView(APIView):
         return Response(status=200, data={'result':'success'})
 
 @extend_schema(tags=["Team Views"])
-class TeamView(APIView):
+class TeamView(ViewSet):
     permission_classes = [IsAuthenticated,]
     #получить по id
     @extend_schema(
@@ -55,7 +56,7 @@ class TeamView(APIView):
                   OpenApiExample(name='Example get team', value={'error': 'message'}, response_only=True, status_codes=[404]),
         ],
     )
-    def get(self, request):
+    def team_list(self, request):
         response = GetTeam().get_team(request.GET)
         return response
 
@@ -69,7 +70,7 @@ class TeamView(APIView):
                   OpenApiExample(name='Example create team', value={'id_hackaton': '1', 'title':'test_title', 'description':'test'}, request_only=True),
         ],
     )
-    def post(self, request):
+    def create_team(self, request):
         response = GetTeam().create_team(user=request.user, data=request.data)
         return response
 
@@ -82,9 +83,16 @@ class MyTeamListView(APIView):
         description='Получение своей команды по id хакатона',
         parameters=[OpenApiParameter(name='id_hackaton', description='id хакатона', required=True, type=int),],
         responses={200: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
-        examples=[OpenApiExample(name='Example get team', value={"result": {
-                    "list_team": [{"id_hackaton_user": 2, "first_name": "admin", "last_name": "admin", "email": "b@mail.ru"}],
-                    "team": {"id": 4, "title": "test", "description": "test", "hackaton": 1, "owner": 2}}}, 
+        examples=[OpenApiExample(name='Example get team', value={"result": 
+                                                                 {"team_list": [{"pk": 1, 
+                                                                                 "first_name": "admin",
+                                                                                 "last_name": "admin",
+                                                                                 "email": "b@mail.ru"}],
+                                                                  "team": { "id": 1,
+                                                                           "title": "team test2",
+                                                                           "description": "test",
+                                                                           "hackaton": 1,
+                                                                           "owner": 1}}}, 
                     response_only=True, status_codes=[200]),
                   OpenApiExample(name='Example get team', value={'error': 'message'}, response_only=True, status_codes=[404]),
         ],
@@ -142,7 +150,7 @@ class InviteTeamView(APIView):
                             request.data.get('id_hackaton'))
         return Response(status=200, data={'result':'success'})
 
-@extend_schema(tags=['Kick from team'])
+@extend_schema(tags=['Invite in team'])
 class KickUserView(APIView):
     permission_classes = [IsAuthenticated,]
 
@@ -248,3 +256,32 @@ class HackatonUrlInvite(APIView):
         response = GetUserTeam().accept_url_invite(user=request.user, key=request.GET.get('team'))
         return response
 
+@extend_schema(tags=['Invite in team'])
+class JoinRequestView(ViewSet):
+    permission_classes = [AllowAny,]
+    queryset = JoinRequest.objects.all()
+
+    @extend_schema(description='список запросов на вступление в команду', 
+                   parameters=[OpenApiParameter(name='id_hackaton', description='id хакатона', required=True, type=int)],)
+    def get_list_requests(self, request):
+        queryset = QueriesJoinRequest().filter_requests(user=self.request.user, 
+                                                        id_hackaton=self.request.GET['id_hackaton'])
+        serializer_requests = JoinRequestSerializer(queryset, many=True)
+        return Response(status=200, data={'result':serializer_requests.data})
+    
+    @extend_schema(description='отправить запрос на вступление в команду', 
+                   parameters=[OpenApiParameter(name='team', description='id команды', required=True, type=int)],)
+    def request_join_team(self, request):
+        response = QueriesJoinRequest().create_join_request(user=request.user, 
+                                                            team=request.GET['team'])
+        return response
+    
+    @extend_schema(description='ответить на запрос', 
+                   parameters=[OpenApiParameter(name='id', description='id запроса', required=True, type=int),
+                               OpenApiParameter(name='status', description='ответ (True/False)', required=True, type=str)],)
+    def answer_request(self, request):
+        response = QueriesJoinRequest().answer_request(user=request.user, 
+                                                       id_join=request.GET['id'], 
+                                                       answer=request.GET['status'])
+        return response
+    

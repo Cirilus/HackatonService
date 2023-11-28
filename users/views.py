@@ -8,6 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAu
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse, OpenApiRequest
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import viewsets
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from .models import User
 
@@ -16,7 +17,7 @@ from .models import User
         tags=["User Views"],
         description='CRUD user',
     )
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny, ]
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -28,6 +29,16 @@ class UserViewSet(viewsets.ModelViewSet):
         queryset = GetUser().get_user(request.user.pk)
         serializer = UserSerializer(queryset)
         return Response(status=200, data={'result':serializer.data})
+    
+@extend_schema(
+        tags=["User Views"],
+        description='Регистрация пользователя',
+    )
+class SignUpView(CreateAPIView):
+    permission_classes = [AllowAny,]
+    serializer_class = UserSerializer
 
-
-
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        instance.set_password(instance.password)
+        instance.save()

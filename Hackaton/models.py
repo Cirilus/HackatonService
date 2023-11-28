@@ -18,9 +18,9 @@ class Hackaton(models.Model):
     start = models.DateTimeField(default=datetime.datetime.now)
     end = models.DateTimeField()
 
-    tracks = ArrayField(models.CharField(max_length=150), default=list)
+    # tracks = ArrayField(models.CharField(max_length=150), default=list)
     grand_prize = models.CharField(max_length=150, blank=True)
-    roles = ArrayField(models.CharField(max_length=150), default=list)
+    # roles = ArrayField(models.CharField(max_length=150), default=list)
     location = models.CharField(max_length=150, blank=True)
     is_online = models.BooleanField(default=True)
 
@@ -55,7 +55,7 @@ class Team(models.Model):
             raise ValidationError('error')
         
     def __str__(self):
-        return self.title + ' ' + self.hackaton.title
+        return f'id: {self.pk}, title: {self.title}'
 
 
 class User_Team(models.Model):
@@ -69,3 +69,12 @@ class User_Team(models.Model):
         
     def __str__(self):
         return self.user.user.middle_name + ' ' + self.team.hackaton.title + ' ' + self.team.title
+
+
+class JoinRequest(models.Model):
+    status_choice = [('accept', 'accept'),
+                     ('pending', 'pending'),
+                     ('decline', 'decline')]
+    user = models.ForeignKey(Hackaton_User, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    status = models.CharField(max_length=15, choices=status_choice, default='pending')
