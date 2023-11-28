@@ -1,0 +1,21 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - master
+      - CD_test
+
+
+build:
+  name: Build
+  runs-on: ubuntu-latest
+  steps:
+  - name: executing remote ssh commands using password
+    uses: appleboy/ssh-action@v1.0.0
+    with:
+      host: 94.154.11.47
+      username: root
+      password: 4xKFrr47v3Ilf6T3CP
+      port: 22
+      script: whoami

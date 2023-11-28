@@ -7,12 +7,10 @@ on:
   push:
     branches:
       - master
-      - fix_postgres
 
   pull_request:
     branches:
       - master
-      - fix_postgres
 
 jobs:
   run_CI:
