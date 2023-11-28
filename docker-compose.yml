@@ -46,6 +46,7 @@ services:
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
+      - /etc/letsencrypt:/etc/letsencrypt
     depends_on:
       - backend
     ports:
