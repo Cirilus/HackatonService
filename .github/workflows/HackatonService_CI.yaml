@@ -7,10 +7,12 @@ on:
   push:
     branches:
       - master
+      - CI_CD
 
   pull_request:
     branches:
       - master
+      - CI_CD
 
 jobs:
   run_CI:
