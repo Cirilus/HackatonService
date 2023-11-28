@@ -22,3 +22,7 @@ jobs:
         script: |
           whoami
           echo "Hello from GitHub Actions!"
+          echo "Hostname: $HOSTNAME"
+          echo "Current directory: $(pwd)"
+          echo "Files in current directory:"
+          ls -al
