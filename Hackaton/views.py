@@ -42,7 +42,7 @@ class HackatonUserView(APIView):
         return Response(status=200, data={'result':'success'})
 
 @extend_schema(tags=["Team Views"])
-class TeamView(APIView):
+class TeamView(ViewSet):
     permission_classes = [IsAuthenticated,]
     #получить по id
     @extend_schema(
@@ -56,7 +56,7 @@ class TeamView(APIView):
                   OpenApiExample(name='Example get team', value={'error': 'message'}, response_only=True, status_codes=[404]),
         ],
     )
-    def get(self, request):
+    def team_list(self, request):
         response = GetTeam().get_team(request.GET)
         return response
 
@@ -70,7 +70,7 @@ class TeamView(APIView):
                   OpenApiExample(name='Example create team', value={'id_hackaton': '1', 'title':'test_title', 'description':'test'}, request_only=True),
         ],
     )
-    def post(self, request):
+    def create_team(self, request):
         response = GetTeam().create_team(user=request.user, data=request.data)
         return response
 

@@ -22,7 +22,9 @@ class ManagerTeam():
         return Team.objects.filter(owner=id_owner).first()
     
     def delete_team(self, id_team):
-        User_Team.objects.filter(team=id_team).delete()
+        users = User_Team.objects.filter(team=id_team)
+        if users:
+            users.delete()
         Team.objects.filter(pk=id_team).first().delete()
 
 
