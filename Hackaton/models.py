@@ -18,9 +18,9 @@ class Hackaton(models.Model):
     start = models.DateTimeField(default=datetime.datetime.now)
     end = models.DateTimeField()
 
-    # tracks = ArrayField(models.CharField(max_length=150), default=list)
+    tracks = ArrayField(models.CharField(max_length=150), default=list)
     grand_prize = models.CharField(max_length=150, blank=True)
-    # roles = ArrayField(models.CharField(max_length=150), default=list)
+    roles = ArrayField(models.CharField(max_length=150), default=list)
     location = models.CharField(max_length=150, blank=True)
     is_online = models.BooleanField(default=True)
 
