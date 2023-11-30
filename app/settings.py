@@ -140,7 +140,7 @@ MEDIA_URL = env.str('MEDIA_URL', default='media/')
 STATIC_ROOT = 'static'
 STATIC_URL = env.str('STATIC_URL', default='static/')
 
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'TLD',
