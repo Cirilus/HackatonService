@@ -7,7 +7,7 @@ from users.serializers import FeedbackSerializer
 
 
 
-class ContactByResume_APITestCase(APITestCase):
+class Feedback_APITestCase(APITestCase):
     def setUp(self):
         # тестовые данные
 
