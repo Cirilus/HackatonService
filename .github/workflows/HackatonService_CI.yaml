@@ -7,12 +7,12 @@ on:
   push:
     branches:
       - master
-      - CI_CD
+
 
   pull_request:
     branches:
       - master
-      - CI_CD
+
 
 jobs:
   run_CI:
@@ -88,6 +88,7 @@ jobs:
           python manage.py test Resume.tests.Work_tests
           python manage.py test Score.tests.HistoryPoint_tests
           python manage.py test Score.tests.PointCondition_tests
+          python manage.py test users.tests.Feedback_tests
 
 # добавить тесты Вити когда он их пофиксит
 # что еще нужно делать? полностью билдить проект - это же уже к CD относится? (разворачивать докер и все такое..)

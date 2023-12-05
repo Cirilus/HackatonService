@@ -59,8 +59,5 @@ urlpatterns = [
 
     path('api/v1/educationlist/byresumeid/<int:resume_id>/', EducationCRUD.as_view({'get': 'byresumeid'})),
 
-
-    path('helpcd/', cd_test_endpoint, name='cd_test_endpoint'),
-
 ]
 
