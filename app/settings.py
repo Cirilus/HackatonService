@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'drf_spectacular_sidecar',
     'rest_framework',
     'corsheaders',
+    'django_filters',
 
     'Authentication.apps.AuthenticationConfig',
     'Hackaton',
@@ -163,7 +164,11 @@ REST_FRAMEWORK = {
 
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -5,12 +5,13 @@ from rest_framework.decorators import action
 
 from drf_spectacular.utils import extend_schema
 
-from .serializers import ResumeSerializer, GraduationSerializer, EducationSerializer, WorkSerializer, ContactSerializer, HackatonsSerializer
+from .serializers import ResumeSerializer, GraduationSerializer, EducationSerializer, WorkSerializer, ContactSerializer, \
+    HackatonsSerializer
 
 from .models import Resume, Graduation, Education, Work, Contact, Hackatons
 
 
-@extend_schema(description="Resume URLs:", tags=["Resume"])
+@extend_schema(description="Resume URLs: (CRUD по Resume по собственному id)", tags=["Resume"])
 class ResumeCRUD(viewsets.ModelViewSet):
     permission_classes = [AllowAny, ]
     queryset = Resume.objects.all()
@@ -28,6 +29,9 @@ class ResumeCRUD(viewsets.ModelViewSet):
 
         return queryset
 
+    @extend_schema(
+        description='получить резюме относящиеся к пользователю с определенным user_id + можно выставить фильтрацию по полю visible &visible=true/false',
+    )
     def byuserid(self, request, user_id=None):
         self.lookup_field = 'user_id'
 
@@ -59,12 +63,15 @@ class ResumeCRUD(viewsets.ModelViewSet):
 
 
 # получение списка всех объектов, получение создание удаление изменение объектов по resume_id
-@extend_schema(description="Work URLs:", tags=["Work"])
+@extend_schema(description="Work URLs: (CRUD по Work)", tags=["Work"])
 class WorkCRUD(viewsets.ModelViewSet):
     permission_classes = [AllowAny, ]
     queryset = Work.objects.all()
     serializer_class = WorkSerializer
 
+    @extend_schema(
+        description='получить works относящиеся к пользователю с определенным resume',
+    )
     @action(detail=False, methods=['get'], )  # может добавить и другие методы?
     def byresumeid(self, request, resume_id=None):
         # http://127.0.0.1:8000/api/v1/worklist/byuserid/<int:user_id>/
@@ -82,12 +89,15 @@ class WorkCRUD(viewsets.ModelViewSet):
 
 
 # получение списка всех объектов, получение создание удаление изменение объектов по resume_id
-@extend_schema(description="Contact URLs:", tags=["Contact"])
+@extend_schema(description="Contact URLs: (CRUD по Contact)", tags=["Contact"])
 class ContactCRUD(viewsets.ModelViewSet):
     permission_classes = [AllowAny, ]
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
 
+    @extend_schema(
+        description='получить contacts относящиеся к пользователю с определенным resume',
+    )
     @action(detail=False, methods=['get'], )  # может добавить и другие методы?
     def byresumeid(self, request, resume_id=None):
         # http://127.0.0.1:8000/api/v1/pointconditionlist/byuserid/<int:user_id>/
@@ -105,12 +115,15 @@ class ContactCRUD(viewsets.ModelViewSet):
 
 
 # получение списка всех объектов, получение создание удаление изменение объектов по resume_id
-@extend_schema(description="Hackatons URLs:", tags=["Hackatons"])
+@extend_schema(description="Hackatons URLs: (CRUD по Hackatons)", tags=["Hackatons"])
 class HackatonsCRUD(viewsets.ModelViewSet):
     permission_classes = [AllowAny, ]
     queryset = Hackatons.objects.all()
     serializer_class = HackatonsSerializer
 
+    @extend_schema(
+        description='получить hackatons относящиеся к пользователю с определенным resume',
+    )
     @action(detail=False, methods=['get'], )
     def byresumeid(self, request, resume_id=None):
         # http://127.0.0.1:8000/api/v1/hackatonslist/byresumeid/<int:user_id>/
@@ -128,12 +141,15 @@ class HackatonsCRUD(viewsets.ModelViewSet):
 
 
 # получение списка всех объектов, получение создание удаление изменение объектов по resume_id
-@extend_schema(description="Education URLs:", tags=["Education"])
+@extend_schema(description="Education URLs: (CRUD по Education)", tags=["Education"])
 class EducationCRUD(viewsets.ModelViewSet):
     permission_classes = [AllowAny, ]
     queryset = Education.objects.all()
     serializer_class = EducationSerializer
 
+    @extend_schema(
+        description='получить education относящиеся к пользователю с определенным resume',
+    )
     @action(detail=False, methods=['get'], )  # может добавить и другие методы?
     def byresumeid(self, request, resume_id=None):
         # http://127.0.0.1:8000/api/v1/educationlist/byresumeid/<int:user_id>/
@@ -151,14 +167,10 @@ class EducationCRUD(viewsets.ModelViewSet):
 
 
 # получение списка всех объектов, получение создание удаление изменение объектов по id
-@extend_schema(description="Graduation URLs:", tags=["Graduation"])
+@extend_schema(description="Graduation URLs: (CRUD по Graduation)", tags=["Graduation"])
 class GraduationCRUD(viewsets.ModelViewSet):
     permission_classes = [AllowAny, ]
     queryset = Graduation.objects.all()
     serializer_class = GraduationSerializer
 
 
-from django.http import JsonResponse
-
-def cd_test_endpoint(request):
-    return JsonResponse({'cd_test': 'ok'})

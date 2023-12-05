@@ -93,11 +93,11 @@ class ContactByResume_APITestCase(APITestCase):
 
     def test_delete_contact_by_own(self):
         # удаление записи по id ||api/v1/contactlist/<int: pk>/
-        url_by_resume_id = url = reverse("contact-detail", kwargs={'pk': 2})
-        response = self.client.delete(url_by_resume_id)
+        url_by_own_id = url = reverse("contact-detail", kwargs={'pk': 2})
+        response = self.client.delete(url_by_own_id)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        count_of_records = Contact.objects.filter(resume_id=1).count()
+        count_of_records = Contact.objects.filter(pk=2).count()
         self.assertEqual(count_of_records, 0)
 
     def test_update_contact_by_own_id(self):
