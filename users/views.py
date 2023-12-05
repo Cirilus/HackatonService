@@ -52,7 +52,7 @@ class SignUpView(CreateAPIView):
 
 @extend_schema(description="Feedback URLs: (CRUD для feedback)", tags=["Feedback"])
 class FeedbackCRUD(viewsets.ModelViewSet):
-    permission_classes = [AllowAny, ] #в проде должно быть IsAuthenticated
+    permission_classes = [AllowAny, ]  # в проде должно быть IsAuthenticated
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
     filter_backends = [DjangoFilterBackend]
@@ -60,6 +60,7 @@ class FeedbackCRUD(viewsets.ModelViewSet):
         "status": ["exact", ],
         "create_at": ["date__exact", 'date__gte', 'date__lte']
     }
+
     # ?create_at__date__lte=2023-01-01, ?create_at__date__gte=2023-01-01, ?create_at__date=2023-01-01,
     # ?status=[New, Current, Completed] - запросы на фильтрацию
 
@@ -104,7 +105,6 @@ class FeedbackCRUD(viewsets.ModelViewSet):
         # http://127.0.0.1:8000/api/v1/feedback/delete_by_userid/<int:user_id>/
         if user_id is None:
             return Response({"error": "Введите user_id."}, status=status.HTTP_400_BAD_REQUEST)
-
 
         feedback_objects = Feedback.objects.filter(user_id=user_id)
         if not feedback_objects.exists():
