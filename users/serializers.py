@@ -1,6 +1,7 @@
 from .models import User, Feedback
 from rest_framework import serializers
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -12,4 +13,3 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
         fields = ['id', 'user', 'contact_back', 'feedback_massage', 'create_at', 'status']
-

@@ -5,6 +5,7 @@ import datetime
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -41,7 +42,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-
 class Feedback(models.Model):
     class FeedbackChoices(models.TextChoices):
         NEW = 'New', 'New'
@@ -61,7 +61,5 @@ class Feedback(models.Model):
         verbose_name = "Обратная связь"
         verbose_name_plural = "Обратная связь"
 
-
     def __str__(self):
         return f'own_id: {self.pk}, user_id:{self.user}'
-
