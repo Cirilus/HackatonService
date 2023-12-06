@@ -1,11 +1,21 @@
 from rest_framework import serializers
 from .models import Hackaton_User, User_Team, Hackaton, Team, JoinRequest
 
-
 class HackatonUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hackaton_User
         fields = '__all__'
+    
+
+class ListHackatonUsers(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user.pk')
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name')
+    email = serializers.CharField(source='user.email')
+
+    class Meta:
+        model = Hackaton_User
+        fields = ['id', 'first_name', 'last_name', 'email']
 
 
 class ListTeamSerializer(serializers.ModelSerializer):

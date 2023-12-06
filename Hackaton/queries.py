@@ -1,5 +1,5 @@
 from .models import Hackaton_User, User_Team, Team, Hackaton
-from .serializers import TeamSerializer, UserTeamSerializer, ListTeamSerializer, JoinRequestSerializer
+from .serializers import TeamSerializer, UserTeamSerializer, ListTeamSerializer, JoinRequestSerializer, ListHackatonUsers
 from rest_framework.response import Response
 from rest_framework import status
 from .exceptions import NotFoundHackaton, NotFoundHackatonUser, NotFoundTeam, NotFoundUserTeam, NotFoundInvite, TeamIsFull, NotFoundJoinRequest
@@ -31,6 +31,12 @@ class GetHackatonUser():
         if user_hack:
             return user_hack
         return Response(status=404, data={'error':UserDoesNotRegistrationInHackaton().value})
+    
+    def get_list_users(self, id_hackaton):
+        queryset = Hackaton_User.objects.filter(hackaton=id_hackaton)
+        serializer_users = ListHackatonUsers(queryset, many=True)
+        return Response(status=200, data={'result':serializer_users.data})
+
 
 class GetTeam():
     def get_team(self, data):
@@ -294,11 +300,25 @@ class DeleteUserTeam():
 
 class QueriesJoinRequest():
     def filter_requests(self, user, id_hackaton):
-        hack_user = ManagerHackatonUser().get_hackaton_user(user=user, id_hackaton=id_hackaton)
-        team = ManagerTeam().get_team_from_owner(id_owner=hack_user.pk)
-        requests = ManagerJoinRequest().get_list_requests(id_team=team.pk).filter(status='pending')
-        return requests
+        try:
+            hack_user = ManagerHackatonUser().get_hackaton_user(user=user, id_hackaton=id_hackaton)
+            if hack_user is None:
+                raise NotFoundHackatonUser(YouDontRegistrationInHackaton().value)
+            
+            team = ManagerTeam().get_team_from_owner(id_owner=hack_user.pk)
+            if team is None:
+                raise NotFoundTeam(YouAreNotCreatorTeam().value)
+            
+            queryset = ManagerJoinRequest().get_list_requests(id_team=team.pk).filter(status='pending')
+            serializer_requests = JoinRequestSerializer(queryset, many=True)
 
+            return Response(status=200, data={'result':serializer_requests.data})
+        
+        except NotFoundTeam as e:
+            return Response(status=404, data={'error':str(e)})
+        except NotFoundHackatonUser as e:
+            return Response(status=405, data={'error':str(e)})
+        
     def create_join_request(self, user, team):
         try:
             data = {}
@@ -320,7 +340,8 @@ class QueriesJoinRequest():
                 return Response(status=200, data={'result':'success'})
             
             return GetUserTeam().accept_invite(user=user, data={'team':team.pk})
-        
+
+
         except NotFoundTeam as e:
             return Response(status=404, data={'error':str(e)})
         except NotFoundHackatonUser as e:
