@@ -196,7 +196,7 @@ class Resumebyuserid_APITestCase(APITestCase):
         # тест для  получения несуществующей записи по user_id || api/v1/resumelist/byuserid/<int: user_id>/
         url_by_user_id = '/api/v1/resumelist/byuserid/10/'  # не существующий
         response = self.client.get(url_by_user_id)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({"error": "Резюме с таким user_id 10 не существует."}, response.data)
 
     def test_delete_resume_by_userid(self):

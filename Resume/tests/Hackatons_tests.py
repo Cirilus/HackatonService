@@ -78,7 +78,7 @@ class HackatonsByResume_APITestCase(APITestCase):
         # тест для  получения несуществующей записи по resume_id || api/v1/hackatonslist/byuserid/<int: user_id>/
         url_by_resume_id = '/api/v1/hackatonslist/byresumeid/11/'  # не существующий
         response = self.client.get(url_by_resume_id)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({"error": "записи с таким resume_id не существует."}, response.data)
 
     def test_create_hackatons(self):
