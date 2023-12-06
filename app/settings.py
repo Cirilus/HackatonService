@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'drf_spectacular_sidecar',
     'rest_framework',
     'corsheaders',
+    'django_filters',
 
     'Authentication.apps.AuthenticationConfig',
     'Hackaton',
@@ -87,26 +88,17 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 
 
-DATABASES = {}
 
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env.str('DATABASE_NAME'),
+        'USER': env.str('DATABASE_USER'),
+        'PASSWORD': env.str('DATABASE_PASSWORD'),
+        'HOST': env.str('DATABASE_HOST'),
+        'PORT': env.str('DATABASE_PORT'),
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': env.str('DATABASE_NAME'),
-            'USER': env.str('DATABASE_USER'),
-            'PASSWORD': env.str('DATABASE_PASSWORD'),
-            'HOST': env.str('DATABASE_HOST'),
-            'PORT': env.str('DATABASE_PORT'),
-        }
-    }
+}
 
 CACHES = {
     'default': {
@@ -149,6 +141,8 @@ MEDIA_URL = env.str('MEDIA_URL', default='media/')
 STATIC_ROOT = 'static'
 STATIC_URL = env.str('STATIC_URL', default='static/')
 
+CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'TLD',
     'DESCRIPTION': '',
@@ -173,6 +167,10 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 2,
+
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

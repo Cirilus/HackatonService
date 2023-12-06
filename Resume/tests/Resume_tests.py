@@ -200,7 +200,7 @@ class Resumebyuserid_APITestCase(APITestCase):
         self.assertEqual({"error": "Резюме с таким user_id 10 не существует."}, response.data)
 
     def test_delete_resume_by_userid(self):
-        # получение записи по id ||api/v1/resumelist/byuserid/<int: user_id>/
+        # удаление записи по id ||api/v1/resumelist/byuserid/<int: user_id>/
         url_by_user_id = '/api/v1/resumelist/byuserid/1/'
         response = self.client.delete(url_by_user_id)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
