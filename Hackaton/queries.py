@@ -340,7 +340,8 @@ class QueriesJoinRequest():
                 return Response(status=200, data={'result':'success'})
             
             return GetUserTeam().accept_invite(user=user, data={'team':team.pk})
-        
+
+
         except NotFoundTeam as e:
             return Response(status=404, data={'error':str(e)})
         except NotFoundHackatonUser as e:
