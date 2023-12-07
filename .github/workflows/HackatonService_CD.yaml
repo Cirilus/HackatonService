@@ -5,20 +5,95 @@ on:
   push:
     branches:
       - master
-#      - CI_CD
+
 
 jobs:
+
   build:
     name: Build
     runs-on: ubuntu-latest
+    env:
+      DATABASE_PASSWORD: postgres
+      DATABASE_USER: postgres
+      DATABASE_NAME: postgres
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5433
+      DJANGO_SECRET_KEY: some-test-key-not-good-for-prod
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: ${{ env.DATABASE_USER }}
+          POSTGRES_PASSWORD: ${{ env.DATABASE_PASSWORD }}
+          POSTGRES_DB: ${{ env.DATABASE_NAME }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+
+    strategy:
+      matrix:
+        python-version: [ '3.11' ]
+
+
     steps:
-    - name: executing remote ssh commands using password
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        port: ${{ secrets.PORT }}
-        script: |
-          cd HackatonService && git pull origin master && docker compose up --build -d
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: tests for Score, Resume etc
+        env:
+          DEBUG: "0"
+          DJANGO_SECRET_KEY: ${{ env.DJANGO_SECRET_KEY }}
+          DATABASE_USER: ${{ env.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ env.DATABASE_PASSWORD }}
+          DATABASE_HOST: ${{ env.DATABASE_HOST }}
+          DATABASE_NAME: ${{ env.DATABASE_NAME }}
+          DATABASE_PORT: ${{ env.DATABASE_PORT }}
+        run: |
+          source .venv/bin/activate
           
+          python manage.py makemigrations
+          python manage.py migrate
+          
+          python manage.py test Resume.tests.Resume_tests
+          python manage.py test Resume.tests.Contact_tests
+          python manage.py test Resume.tests.Education_tests
+          python manage.py test Resume.tests.Graduation_tests
+          python manage.py test Resume.tests.Hackatons_tests
+          python manage.py test Resume.tests.Work_tests
+          python manage.py test Score.tests.HistoryPoint_tests
+          python manage.py test Score.tests.PointCondition_tests
+          python manage.py test users.tests.Feedback_tests
+      #добавить витины тесты потом
+
+      - name: executing remote ssh commands using password
+        if: success() # проверка на проход тестов
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd HackatonService && git pull origin master && docker compose up --build -d
+      
