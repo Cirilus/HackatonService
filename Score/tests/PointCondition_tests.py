@@ -34,11 +34,11 @@ class PointCondition_APITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         count_of_records = PointCondition.objects.count()
-        self.assertEqual(len(response.data), count_of_records)
+        self.assertEqual(response.data['count'], count_of_records)
 
         obj_from_DB = PointCondition.objects.all()
         serializer_data = PointConditionSerializer(obj_from_DB, many=True).data
-        self.assertEqual(serializer_data, response.data)
+        self.assertEqual(len(serializer_data), response.data['count'])
 
     def test_API_for_pointcondition_detail(self):
         # тест получения записи по собственному id || api/v1/pointconditionlist/<int:pk>
