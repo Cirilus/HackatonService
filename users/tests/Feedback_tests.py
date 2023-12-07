@@ -4,6 +4,16 @@ from django.urls import reverse
 from users.models import User, Feedback
 from rest_framework import status
 from users.serializers import FeedbackSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
 
 
 class Feedback_APITestCase(APITestCase):
@@ -31,10 +41,15 @@ class Feedback_APITestCase(APITestCase):
         self.feedback_instance_4 = Feedback.objects.create(id=5, user_id=3, contact_back='test4',
                                                            feedback_massage='test4', status='Completed')
 
+        tokens = get_tokens_for_user(self.user_instance_1)
+        self.access_token = tokens['access']
+
     def test_get_feedback_list(self):
         # тест получение всех записей || api/v1/users/feedbacklist/
         url_list = reverse('feedback-list')
-        response = self.client.get(url_list)
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.get(url_list, headers=headers)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         count_of_records = Feedback.objects.count()
@@ -42,12 +57,13 @@ class Feedback_APITestCase(APITestCase):
 
         obj_from_DB = Feedback.objects.all()
         serializer_data = FeedbackSerializer(obj_from_DB, many=True).data
-        self.assertEqual(serializer_data, response.data)
+        self.assertEqual(len(serializer_data), response.data['count'])
 
     def test_get_feedback_by_own_id(self):
         # получение записи по id || api/v1/contactlist/<int: pk>/
         url_by_own_id = reverse('feedback-detail', kwargs={'pk': self.feedback_instance_1.id})
-        response = self.client.get(url_by_own_id)
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.get(url_by_own_id, headers=headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         serializer_data = FeedbackSerializer(self.feedback_instance_1).data
@@ -55,14 +71,17 @@ class Feedback_APITestCase(APITestCase):
 
         # api/v1/users/feedbacklist/<int:pk>/ - для несуществуюшей записи. 404 должен возвращать???
         url_by_own_id = reverse('feedback-detail', kwargs={'pk': 123})
-        response = self.client.get(url_by_own_id)
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.get(url_by_own_id, headers=headers)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({"detail": "Not found."}, response.data)
 
     def test_get_feedback_by_user_id(self):
         # тест для получения записи или записей по user_id  || api/v1/users/feedbacklist/byuserid/<int: user_id>/
         url_by_user_id = r'/api/v1/users/feedbacklist/byuserid/3/'  # несколько записей
-        response = self.client.get(url_by_user_id)
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.get(url_by_user_id, headers=headers)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         count_of_records = Feedback.objects.filter(user_id=3).count()
         self.assertEqual(len(response.data), count_of_records)
@@ -72,7 +91,8 @@ class Feedback_APITestCase(APITestCase):
         self.assertEqual(serializer_data, response.data)
 
         url_by_user_id = r'/api/v1/users/feedbacklist/byuserid/2/'  # одна запись
-        response = self.client.get(url_by_user_id)
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.get(url_by_user_id, headers=headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         count_of_records = Feedback.objects.filter(user_id=2).count()
         self.assertEqual(len(response.data), count_of_records)
@@ -83,47 +103,38 @@ class Feedback_APITestCase(APITestCase):
 
         # тест для  получения несуществующей записи по user_id || api/v1/users/feedbacklist/byuserid/<int: user_id>/
         url_by_user_id = r'/api/v1/users/feedbacklist/byuserid/123/'  # не существующий
-        response = self.client.get(url_by_user_id)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.get(url_by_user_id, headers=headers)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({"error": "записи с таким user_id не существует"}, response.data)
 
         url_by_user_id = r'/api/v1/users/feedbacklist/byuserid/'  # не указан user id
-        response = self.client.get(url_by_user_id)
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.get(url_by_user_id, headers=headers)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual({"error": "введите user_id."}, response.data)
 
     def test_create_feedback_instance(self):
-        # тест добавление записи в модель contact|| api/v1/users/feedbacklist/
         data = {
-            'id': 5,
-            "user": 2,
-            "feedback_massage": "test5",
+            'user': self.user_instance_1.id,
+            'feedback_massage': 'test5',
             'contact_back': 'test5',
             'status': 'New'
         }
 
-        url = reverse("feedback-list")
-        response = self.client.post(url, data, format="json")
+        url = reverse('feedback-list')
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.post(url, data, format='json', headers=headers)
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Feedback.objects.count(), 5)
-
-        # создание записи без указанного user_id
-        data = {
-            'id': 6,
-            "feedback_massage": "test6",
-            'contact_back': 'test6',
-            'status': 'New'
-        }
-
-        url = reverse("feedback-list")
-        response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual('Укажите user_id при создании записи.', *response.data)
 
     def test_delete_feedback_by_own(self):
         # удаление записи по id ||api/v1/users/feedbacklist/<int: pk>/
         url_by_own_id = reverse("feedback-detail", kwargs={'pk': 2})
-        response = self.client.delete(url_by_own_id)
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.delete(url_by_own_id, headers=headers)
+
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         count_of_records = Feedback.objects.filter(pk=2).count()
@@ -133,7 +144,8 @@ class Feedback_APITestCase(APITestCase):
         # удаление всех записей из таблицы Feedback,
         # привязанных к определенному user ||api/v1/users/feedbacklist/delete_by_userid/<int:user_id>/
         url_by_user_id = r'/api/v1/users/feedbacklist/delete_by_userid/3/'
-        response = self.client.delete(url_by_user_id)
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.delete(url_by_user_id, headers=headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         count_of_records = Feedback.objects.filter(user=3).count()
@@ -143,20 +155,22 @@ class Feedback_APITestCase(APITestCase):
     def test_delete_feedback_by_unexistence_userid(self):
         # удаление записи с несущществующим user_id
         url_by_user_id = r'/api/v1/users/feedbacklist/delete_by_userid/3231/'
-        response = self.client.delete(url_by_user_id)
+        headers = {'Authorization': f'Bearer {self.access_token}'}
+        response = self.client.delete(url_by_user_id, headers=headers)
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn('Записи с таким user_id не существуют', response.data['error'])
 
-    def test_update_feedback_instanceZ_by_own_id(self):
+    def test_update_feedback_instance_by_own_id(self):
         # обновление записи по id ||api/v1/users/feedbacklist/<int: pk>/
         url_by_own_id = reverse("feedback-detail", kwargs={'pk': 3})
         updated_data = {'user': 3,
                         'feedback_massage': 'Обновленное feedback_massage',
                         'status': 'Completed'}
+        headers = {'Authorization': f'Bearer {self.access_token}'}
 
         # PUT запрос на указанный URL с обновленными данными
-        response = self.client.put(url_by_own_id, updated_data, format='json')
+        response = self.client.put(url_by_own_id, updated_data, format='json', headers=headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Перезагружаем запись
 

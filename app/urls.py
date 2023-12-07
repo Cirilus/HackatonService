@@ -29,15 +29,16 @@ urlpatterns = [
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
-    path('api/v1/users/', include('users.urls')),
-    path('api/v1/hackaton/', include('Hackaton.urls')),
+
     
     path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
-    path('', include('Resume.urls')), #resume
-    path('', include('Score.urls')), #score
+    path('api/v1/users/', include('users.urls')),
+    path('api/v1/hackaton/', include('Hackaton.urls')),
+    path('', include('Resume.urls')),
+    path('', include('Score.urls')),
 ]
 
 

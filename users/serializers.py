@@ -13,3 +13,4 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
         fields = ['id', 'user', 'contact_back', 'feedback_massage', 'create_at', 'status']
+        read_only_fields = ('user', 'created_at')  # Поля только для чтения

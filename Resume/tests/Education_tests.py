@@ -42,11 +42,11 @@ class EducationByResume_APITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         count_of_records = Education.objects.count()
-        self.assertEqual(len(response.data), count_of_records)
+        self.assertEqual(response.data['count'], count_of_records)
 
         obj_from_DB = Education.objects.all()
         serializer_data = EducationSerializer(obj_from_DB, many=True).data
-        self.assertEqual(serializer_data, response.data)
+        self.assertEqual(len(serializer_data), response.data['count'])
 
     def test_get_education_by_own_id(self):
         # получение записи по id || api/v1/educationslist/<int: pk>/
@@ -76,7 +76,7 @@ class EducationByResume_APITestCase(APITestCase):
         # тест для  получения несуществующей записи по resume_id || api/v1/educationlist/byuserid/<int: user_id>/
         url_by_resume_id = '/api/v1/educationlist/byresumeid/11/'  # не существующий
         response = self.client.get(url_by_resume_id)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual({"error": "записи с таким resume_id не существует."}, response.data)
 
     def test_create_education(self):

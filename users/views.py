@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from .queries import GetUser, UserScore
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse, OpenApiRequest
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import viewsets, status
@@ -52,7 +53,7 @@ class SignUpView(CreateAPIView):
 
 @extend_schema(description="Feedback URLs: (CRUD для feedback)", tags=["Feedback"])
 class FeedbackCRUD(viewsets.ModelViewSet):
-    permission_classes = [AllowAny, ]  # в проде должно быть IsAuthenticated
+    permission_classes = [IsAuthenticated, ]
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
     filter_backends = [DjangoFilterBackend]
@@ -65,17 +66,14 @@ class FeedbackCRUD(viewsets.ModelViewSet):
     # ?status=[New, Current, Completed] - запросы на фильтрацию
 
     def perform_create(self, serializer):
-        # в проде как-то по другому работать должна...наверное
-        user = serializer.validated_data.get('user', None)
+        serializer.validated_data['user'] = self.request.user
+
+        user_id = self.request.user
+
         contact_back = serializer.validated_data.get('contact_back', None)
 
-        # Если user пуст, бросаем исключение
-        if not user:
-            raise ValidationError("Укажите user_id при создании записи.")
-
-        # Если contact_back пуст, берем email юзера
         if not contact_back:
-            serializer.validated_data['contact_back'] = User.objects.get(email=user).email
+            serializer.validated_data['contact_back'] = User.objects.get(email=user_id).email
 
         super().perform_create(serializer)
 
@@ -90,7 +88,7 @@ class FeedbackCRUD(viewsets.ModelViewSet):
             return Response({"error": "введите user_id."}, status=status.HTTP_400_BAD_REQUEST)
 
         if user_id not in Feedback.objects.values_list('user', flat=True):
-            return Response({"error": "записи с таким user_id не существует"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "записи с таким user_id не существует"}, status=status.HTTP_404_NOT_FOUND)
 
         queryset = Feedback.objects.filter(user_id=user_id)
         serializer = FeedbackSerializer(queryset, many=True)
@@ -108,7 +106,7 @@ class FeedbackCRUD(viewsets.ModelViewSet):
 
         feedback_objects = Feedback.objects.filter(user_id=user_id)
         if not feedback_objects.exists():
-            return Response({"error": "Записи с таким user_id не существуют"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Записи с таким user_id не существуют"}, status=status.HTTP_404_NOT_FOUND)
 
         feedback_objects.delete()
         return Response({"success": f"Записи для пользователя с user_id {user_id} удалены."}, status=status.HTTP_200_OK)

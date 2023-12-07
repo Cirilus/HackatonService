@@ -37,7 +37,7 @@ class ResumeCRUD(viewsets.ModelViewSet):
 
         if user_id not in Resume.objects.values_list('user', flat=True):
             return Response({"error": f"Резюме с таким user_id {user_id} не существует."},
-                            status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_404_NOT_FOUND)
 
         # Добавляем фильтрацию по полю 'visible'
         visible_param = request.query_params.get('visible')
@@ -80,7 +80,7 @@ class WorkCRUD(viewsets.ModelViewSet):
             return Response({"error": "введите resume_id."}, status=status.HTTP_400_BAD_REQUEST)
 
         if resume_id not in Work.objects.values_list('resume', flat=True):
-            return Response({"error": "записи с таким resume_id не существует"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "записи с таким resume_id не существует"}, status=status.HTTP_404_NOT_FOUND)
 
         queryset = Work.objects.filter(resume_id=resume_id)
         serializer = WorkSerializer(queryset, many=True)
@@ -106,7 +106,7 @@ class ContactCRUD(viewsets.ModelViewSet):
             return Response({"error": "введите resume_id."}, status=status.HTTP_400_BAD_REQUEST)
 
         if resume_id not in Contact.objects.values_list('resume', flat=True):
-            return Response({"error": "записи с таким resume_id не существует"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "записи с таким resume_id не существует"}, status=status.HTTP_404_NOT_FOUND)
 
         queryset = Contact.objects.filter(resume_id=resume_id)
         serializer = ContactSerializer(queryset, many=True)
@@ -132,7 +132,7 @@ class HackatonsCRUD(viewsets.ModelViewSet):
             return Response({"error": "введите resume_id."}, status=status.HTTP_400_BAD_REQUEST)
 
         if resume_id not in Hackatons.objects.values_list('resume', flat=True):
-            return Response({"error": "записи с таким resume_id не существует."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "записи с таким resume_id не существует."}, status=status.HTTP_404_NOT_FOUND)
 
         queryset = Hackatons.objects.filter(resume_id=resume_id)
         serializer = HackatonsSerializer(queryset, many=True)
@@ -158,7 +158,7 @@ class EducationCRUD(viewsets.ModelViewSet):
             return Response({"error": "введите resume_id."}, status=status.HTTP_400_BAD_REQUEST)
 
         if resume_id not in Education.objects.values_list('resume', flat=True):
-            return Response({"error": "записи с таким resume_id не существует."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "записи с таким resume_id не существует."}, status=status.HTTP_404_NOT_FOUND)
 
         queryset = Education.objects.filter(resume_id=resume_id)
         serializer = EducationSerializer(queryset, many=True)
