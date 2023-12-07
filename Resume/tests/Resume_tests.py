@@ -32,13 +32,13 @@ class Resume_APITestCase(APITestCase):
         url_list = reverse('resume-list')
         response = self.client.get(url_list)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
+        x = response.data
         count_of_records = Resume.objects.count()
-        self.assertEqual(len(response.data), count_of_records)
+        self.assertEqual(response.data['count'], count_of_records)
 
         obj_from_DB = Resume.objects.all()
         serializer_data = ResumeSerializer(obj_from_DB, many=True).data
-        self.assertEqual(serializer_data, response.data)
+        self.assertEqual(serializer_data, response.data['results'])
 
         # тест получение всех записей || api/v1/resumelist/?visible=False
         url_list = reverse('resume-list')
@@ -46,11 +46,11 @@ class Resume_APITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         count_of_records = Resume.objects.filter(visible=False).count()
-        self.assertEqual(len(response.data), count_of_records)
+        self.assertEqual(response.data['count'], count_of_records)
 
         obj_from_DB = Resume.objects.filter(visible=False)
         serializer_data = ResumeSerializer(obj_from_DB, many=True).data
-        self.assertEqual(serializer_data, response.data)
+        self.assertEqual(serializer_data, response.data['results'])
 
         # тест получение всех записей || api/v1/resumelist/?visible=True
         url_list = reverse('resume-list')
@@ -58,11 +58,11 @@ class Resume_APITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         count_of_records = Resume.objects.filter(visible=True).count()
-        self.assertEqual(len(response.data), count_of_records)
+        self.assertEqual(response.data['count'], count_of_records)
 
         obj_from_DB = Resume.objects.filter(visible=True)
         serializer_data = ResumeSerializer(obj_from_DB, many=True).data
-        self.assertEqual(serializer_data, response.data)
+        self.assertEqual(serializer_data, response.data['results'])
 
     def test_get_resume_by_id(self):
         # получение записи по id || api/v1/resumelist/<int: pk>/

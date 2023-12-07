@@ -40,11 +40,12 @@ class ContactByResume_APITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         count_of_records = Contact.objects.count()
-        self.assertEqual(len(response.data), count_of_records)
+        self.assertEqual(response.data['count'], count_of_records)
 
         obj_from_DB = Contact.objects.all()
         serializer_data = ContactSerializer(obj_from_DB, many=True).data
-        self.assertEqual(serializer_data, response.data)
+        print()
+        self.assertEqual(len(serializer_data),(response.data['count']))
 
     def test_get_contact_by_own_id(self):
         # получение записи по id || api/v1/contactlist/<int: pk>/

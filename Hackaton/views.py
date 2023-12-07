@@ -3,11 +3,12 @@ from users.models import User
 from rest_framework.views import APIView
 from rest_framework import generics, mixins, filters
 from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet, ModelViewSet
-from .serializers import HackatonUserSerializer, ListTeamSerializer, UserTeamSerializer, HackatonSerializer, TeamSerializer, JoinRequestSerializer
+from .serializers import HackatonUserSerializer, ListTeamSerializer, UserTeamSerializer, HackatonSerializer, TeamSerializer, JoinRequestSerializer, ListHackatonUsers
 from rest_framework.response import Response
 from django.forms.models import model_to_dict
 from .models import User_Team, Team, Hackaton_User, Hackaton, JoinRequest
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.decorators import permission_classes
 from .queries import GetHackaton, GetHackatonUser, GetTeam, GetUserTeam, DeleteUserTeam, QueriesJoinRequest
 from .managers import ManagerTeam
 import jwt
@@ -15,12 +16,14 @@ from django.core.cache import cache
 import uuid
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse, OpenApiRequest
 from drf_spectacular.types import OpenApiTypes
+from .paginations import HackatonListPagination, HackatonUserListPagination
 
 
 #регистрация пользователя на хакатон по id
-
-class HackatonUserView(APIView):
+@extend_schema(tags=['Hackaton user'],)
+class HackatonUserView(ViewSet):
     permission_classes = [IsAuthenticated,]
+
     @extend_schema(
         tags=['Hackaton user'],
         description='Регистрация на хакатон',
@@ -40,11 +43,24 @@ class HackatonUserView(APIView):
         serializer.save()
 
         return Response(status=200, data={'result':'success'})
+    
+    def get_queryset(self):
+        queryset = Hackaton_User.objects.all()
+        return queryset.filter(hackaton=self.request.GET.get('id_hacakton'))
+    
+    @extend_schema(
+        tags=['Hackaton user'],
+        description='Зарегистрированные на хакатон пользователи',
+        parameters=[OpenApiParameter(name='id_hackaton', description='id хакатона', required=True, type=int),],
+        responses={200: ListHackatonUsers},
+    )
+    def get_hackaton_users(self, request):
+        response = GetHackatonUser().get_list_users(id_hackaton=request.GET.get('id_hackaton'))
+        return response
+
 
 @extend_schema(tags=["Team Views"])
 class TeamView(ViewSet):
-    permission_classes = [IsAuthenticated,]
-    #получить по id
     @extend_schema(
         description='Получение команды по id',
         parameters=[OpenApiParameter(name='team', description='id team', required=True, type=int),],
@@ -56,30 +72,12 @@ class TeamView(ViewSet):
                   OpenApiExample(name='Example get team', value={'error': 'message'}, response_only=True, status_codes=[404]),
         ],
     )
+    @permission_classes([AllowAny,])
     def team_list(self, request):
         response = GetTeam().get_team(request.GET)
         return response
 
-    #создать команду
     @extend_schema(
-        description='Создать команду',
-        request=OpenApiRequest(),
-        responses={200: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
-        examples=[OpenApiExample(name='Example create team', value={'result': 'заебца'}, response_only=True, status_codes=[200]),
-                  OpenApiExample(name='Example create team', value={'error': 'message'}, response_only=True, status_codes=[404]),
-                  OpenApiExample(name='Example create team', value={'id_hackaton': '1', 'title':'test_title', 'description':'test'}, request_only=True),
-        ],
-    )
-    def create_team(self, request):
-        response = GetTeam().create_team(user=request.user, data=request.data)
-        return response
-
-
-#получение списка своей команды по id хакатона
-class MyTeamListView(APIView):
-    permission_classes = [IsAuthenticated,]
-    @extend_schema(
-        tags=["Team Views"],
         description='Получение своей команды по id хакатона',
         parameters=[OpenApiParameter(name='id_hackaton', description='id хакатона', required=True, type=int),],
         responses={200: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
@@ -97,12 +95,26 @@ class MyTeamListView(APIView):
                   OpenApiExample(name='Example get team', value={'error': 'message'}, response_only=True, status_codes=[404]),
         ],
     )
-    def get(self, request):
+    @permission_classes([IsAuthenticated,])
+    def my_team_list(self, request):
         response = GetTeam().get_my_team(user=request.user.pk, data=request.GET)
         return response
-        
+    
+    @extend_schema(
+        description='Создать команду',
+        request=OpenApiRequest(),
+        responses={200: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
+        examples=[OpenApiExample(name='Example create team', value={'result': 'заебца'}, response_only=True, status_codes=[200]),
+                  OpenApiExample(name='Example create team', value={'error': 'message'}, response_only=True, status_codes=[404]),
+                  OpenApiExample(name='Example create team', value={'id_hackaton': '1', 'title':'test_title', 'description':'test'}, request_only=True),
+        ],
+    )
+    @permission_classes([IsAuthenticated,])
+    def create_team(self, request):
+        response = GetTeam().create_team(user=request.user, data=request.data)
+        return response
 
-#Приглашение в команду
+
 @extend_schema(tags=['Invite in team'])
 class InviteTeamView(APIView):
     permission_classes = [IsAuthenticated,]
@@ -189,6 +201,7 @@ class HackatonListView(ViewSet,
     permission_classes = [AllowAny,]
     queryset = Hackaton.objects.all()
     serializer_class = HackatonSerializer
+    pagination_class = HackatonListPagination
 
     def get_queryset(self):
         queryset = Hackaton.objects.all()
@@ -264,10 +277,9 @@ class JoinRequestView(ViewSet):
     @extend_schema(description='список запросов на вступление в команду', 
                    parameters=[OpenApiParameter(name='id_hackaton', description='id хакатона', required=True, type=int)],)
     def get_list_requests(self, request):
-        queryset = QueriesJoinRequest().filter_requests(user=self.request.user, 
-                                                        id_hackaton=self.request.GET['id_hackaton'])
-        serializer_requests = JoinRequestSerializer(queryset, many=True)
-        return Response(status=200, data={'result':serializer_requests.data})
+        response = QueriesJoinRequest().filter_requests(user=request.user, 
+                                                        id_hackaton=request.GET['id_hackaton'])
+        return response
     
     @extend_schema(description='отправить запрос на вступление в команду', 
                    parameters=[OpenApiParameter(name='team', description='id команды', required=True, type=int)],)

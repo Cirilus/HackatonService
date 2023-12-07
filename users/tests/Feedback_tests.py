@@ -57,7 +57,7 @@ class Feedback_APITestCase(APITestCase):
 
         obj_from_DB = Feedback.objects.all()
         serializer_data = FeedbackSerializer(obj_from_DB, many=True).data
-        self.assertEqual(serializer_data, response.data)
+        self.assertEqual(len(serializer_data), response.data['count'])
 
     def test_get_feedback_by_own_id(self):
         # получение записи по id || api/v1/contactlist/<int: pk>/

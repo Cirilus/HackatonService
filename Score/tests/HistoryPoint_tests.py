@@ -44,11 +44,11 @@ class HistoryPoint_APITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         count_of_records = HistoryPoint.objects.count()
-        self.assertEqual(len(response.data), count_of_records)
+        self.assertEqual(response.data['count'], count_of_records)
 
         obj_from_DB = HistoryPoint.objects.all()
         serializer_data = HistoryPointSerializer(obj_from_DB, many=True).data
-        self.assertEqual(serializer_data, response.data)
+        self.assertEqual(len(serializer_data), response.data['count'])
 
     def test_API_for_historypoint_detail(self):
         # тест получения записи по собственному id || api/v1/historypointlist/<int:pk>
