@@ -207,7 +207,8 @@ class HackatonListView(ViewSet,
         queryset = Hackaton.objects.all()
         filter = {}
         for i in self.request.GET.keys():
-            filter[i] = self.request.GET[i]
+            if i != 'page':
+                filter[i] = self.request.GET[i]
         return queryset.filter(**filter)
     
 
