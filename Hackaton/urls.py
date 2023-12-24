@@ -2,7 +2,8 @@ from django.urls import path, include
 from .views import TeamView, HackatonUserView, InviteTeamView, KickUserView, HackatonUrlInvite, HackatonListView, HackatonCreateView, JoinRequestView
 from rest_framework import routers
 
-
+router_hackaton = routers.SimpleRouter()
+router_hackaton.register(r'createhackaton', HackatonCreateView)
 urlpatterns = [
     path('request_join_team/', JoinRequestView.as_view({'put':'request_join_team', 
                                                         'get':'get_list_requests',
@@ -16,7 +17,7 @@ urlpatterns = [
     path('create_team/', TeamView.as_view({'post':'create_team'})),
     path('invite_url/', HackatonUrlInvite.as_view(), name='invite_url'),
     path('get_hackatons/', HackatonListView.as_view({'get':'list'}), name='get_hackatons'),
-    path('create_hacakton/', HackatonCreateView.as_view(), name='create_hackaton'),
+    path('create_hacakton/', include(router_hackaton.urls)),
     path('get_locations/', HackatonListView.as_view({'get':'get_locations'})),
 ]
 
