@@ -47,13 +47,13 @@ class HackatonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hackaton
-        fields = ['id', 'title', 'image_url', 'description', 'description_short', 
+        fields = ['id', 'title', 'description', 'description_short', 
                   'creator', 'start_registration', 'end_registration', 'start', 'end', 
                   'tracks', 'grand_prize', 'roles', 'location', 'is_online']
 
     def create(self, validated_data):
         tracks_data = validated_data.pop('tracks')
-        print(tracks_data)
+
         hackaton = Hackaton.objects.create(**validated_data)
         for track in tracks_data:
             Track.objects.create(hackaton=hackaton, **track)

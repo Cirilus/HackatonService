@@ -162,6 +162,7 @@ class InviteTeamView(APIView):
                             request.data.get('id_hackaton'))
         return Response(status=200, data={'result':'success'})
 
+
 @extend_schema(tags=['Invite in team'])
 class KickUserView(APIView):
     permission_classes = [IsAuthenticated,]
