@@ -16,7 +16,7 @@ urlpatterns = [
     path('create_team/', TeamView.as_view({'post':'create_team'})),
     path('invite_url/', HackatonUrlInvite.as_view(), name='invite_url'),
     path('get_hackatons/', HackatonListView.as_view({'get':'list'}), name='get_hackatons'),
-    path('create_hacakton/', HackatonCreateView.as_view(), name='create_hackaton'),
+    path('create_hacakton/', HackatonCreateView.as_view(), name='create_hacakton'),
     path('get_locations/', HackatonListView.as_view({'get':'get_locations'})),
 ]
 

@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import ArrayField
 import datetime
 from django.core.validators import FileExtensionValidator
 
+
 class Hackaton(models.Model):
     title = models.CharField(max_length=150)
     image_url = models.FileField(upload_to='hackatons/')
@@ -18,7 +19,6 @@ class Hackaton(models.Model):
     start = models.DateTimeField(default=datetime.datetime.now)
     end = models.DateTimeField()
 
-    tracks = ArrayField(models.CharField(max_length=150), default=list)
     grand_prize = models.CharField(max_length=150, blank=True)
     roles = ArrayField(models.CharField(max_length=150), default=list)
     location = models.CharField(max_length=150, blank=True)
@@ -30,7 +30,13 @@ class Hackaton(models.Model):
     def clean(self):
         if self.image_url.size > 3 * 1024 * 1024 * 8:
             raise ValidationError('image size is too large')
-    
+
+
+class Track(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    hackaton = models.ForeignKey(Hackaton, related_name='tracks', on_delete=models.CASCADE)
+
 
 class Hackaton_User(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
