@@ -191,7 +191,8 @@ class KickUserView(APIView):
         description='Получение списка хакатонов по заданным фильтрам',
         parameters=[OpenApiParameter(name='id', description='id хакатона', required=False, type=int),
                     OpenApiParameter(name='title', description='название хакатона', required=False, type=str),
-                    OpenApiParameter(name='isOnline', description='онлайн', required=False, type=str),],
+                    OpenApiParameter(name='isOnline', description='онлайн', required=False, type=str),
+                    OpenApiParameter(name='location', description='location', required=False, type=str),],
         responses={200: HackatonSerializer, 404: OpenApiTypes.OBJECT},
         examples=[OpenApiExample(name='Example get team', value={'error': 'message'}, response_only=True, status_codes=[404]),],
     )
@@ -207,8 +208,18 @@ class HackatonListView(ViewSet,
     def get_queryset(self):
         queryset = Hackaton.objects.all()
         filter = {}
+
+        title = self.request.GET.get('title')
+        if title:
+            queryset = queryset.filter(title__icontains=title)
+        
+        locations = self.request.GET.get('location')
+        if locations:
+            locations = locations.split(',')
+            queryset = queryset.filter(location__in=locations)
+
         for i in self.request.GET.keys():
-            if i != 'page':
+            if i != 'page' and i != 'title' and i != 'location':
                 filter[i] = self.request.GET[i]
         return queryset.filter(**filter)
     
@@ -217,7 +228,7 @@ class HackatonListView(ViewSet,
         return self.list(request, *args, **kwargs)
 
     def get_locations(self, request):
-        locations = Hackaton.objects.values('location').distinct()
+        locations = Hackaton.objects.values_list('location', flat=True).distinct()
         return Response(status=200, data={'result':locations})
 
 
