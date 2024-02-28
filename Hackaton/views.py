@@ -1,3 +1,7 @@
+import os
+
+from django.http import HttpResponse
+from django.shortcuts import render
 
 from users.models import User
 from rest_framework.views import APIView
@@ -17,7 +21,14 @@ import uuid
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse, OpenApiRequest
 from drf_spectacular.types import OpenApiTypes
 from .paginations import HackatonListPagination, HackatonUserListPagination
+from .tasks import setup_parser_scheduler, run_scrapy_and_db_update
 
+setup_parser_scheduler() #запуск парсера хакатонов и добавления их в бд
+
+def testparser(request):
+    # Логика представления
+    run_scrapy_and_db_update()
+    return HttpResponse("Привет, мир!")
 
 #регистрация пользователя на хакатон по id
 @extend_schema(tags=['Hackaton user'],)

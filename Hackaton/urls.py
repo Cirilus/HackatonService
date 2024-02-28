@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import TeamView, HackatonUserView, InviteTeamView, KickUserView, HackatonUrlInvite, HackatonListView, HackatonCreateView, JoinRequestView
+from .views import testparser, TeamView, HackatonUserView, InviteTeamView, KickUserView, HackatonUrlInvite, HackatonListView, HackatonCreateView, JoinRequestView
 from rest_framework import routers
 
 
@@ -18,5 +18,9 @@ urlpatterns = [
     path('get_hackatons/', HackatonListView.as_view({'get':'list'}), name='get_hackatons'),
     path('create_hacakton/', HackatonCreateView.as_view(), name='create_hacakton'),
     path('get_locations/', HackatonListView.as_view({'get':'get_locations'})),
+
+
+    path('testparser/', testparser, name='testparser'), #инициализация парсинга хакатонов с сайта хакатоны рф
+
 ]
 
