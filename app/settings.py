@@ -21,7 +21,7 @@ environ.Env.read_env()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = env.str('SECRET_KEY', "dafic[124i02gkcao[g45[]cf")
+SECRET_KEY = 'dfasfvvaevjhasdjcajhkbhjb'
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -87,6 +87,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'app.wsgi.application'
 
 
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 
 DATABASES = {
@@ -222,3 +229,13 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
     "django.contrib.auth.hashers.ScryptPasswordHasher",
 ]
+
+
+CELERY_TIMEZONE = 'Europe/Moscow'
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+CELERY_IMPORTS = ('Hackaton.tasks',)
+

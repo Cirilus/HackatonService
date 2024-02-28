@@ -7,6 +7,25 @@ import datetime
 from django.core.validators import FileExtensionValidator
 
 
+
+
+class Parser_Test(models.Model):
+    title = models.CharField(verbose_name='Название хакатона', blank=True, default='Нет данных', max_length=255)
+    image_url = models.URLField(max_length=500, verbose_name='Ссылка на изображение')
+    creator = models.CharField(verbose_name='Организаторы хакатона', blank=True, default='Нет данных')
+    grand_prize = models.TextField( blank=True, verbose_name='Призовой фонд', default='Нет данных')
+    end_registration = models.CharField(verbose_name='Конец регистрации на хакатон', blank=True, default='Нет данных', max_length=255)
+    about = models.TextField(verbose_name='Технологический фокус хакатона', blank=True, default='Нет данных')
+    target_audience = models.TextField(blank=True, verbose_name='Для кого хакатон', default='Нет данных' )
+    date_hackaton = models.CharField(verbose_name='Даты проведения хакатона', blank=True, default='Нет данных', max_length=255)
+    location = models.CharField(blank=True, verbose_name='Место проведения хакатона', null=True, default='Нет данных', max_length=255)
+    is_online = models.BooleanField(default=False, verbose_name='Будет ли возможность онлайн участия', blank=True)
+    hackaton_link = models.URLField(max_length=255, verbose_name='Ссылка на хакатон')
+
+    def __str__(self):
+        return self.title + " by " + self.creator
+
+
 class Hackaton(models.Model):
     title = models.CharField(max_length=150)
     image_url = models.FileField(upload_to='hackatons/')
@@ -23,6 +42,10 @@ class Hackaton(models.Model):
     roles = ArrayField(models.CharField(max_length=150), default=list)
     location = models.CharField(max_length=150, blank=True)
     is_online = models.BooleanField(default=True)
+
+    #hackaton_url = models.URLField(max_length=200, blank=True, null=True)
+    #добавить линк на хакатон для перехода
+
 
     def __str__(self):
         return self.title + " " + self.creator
