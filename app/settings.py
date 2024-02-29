@@ -229,13 +229,3 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
     "django.contrib.auth.hashers.ScryptPasswordHasher",
 ]
-
-
-CELERY_TIMEZONE = 'Europe/Moscow'
-
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-
-CELERY_IMPORTS = ('Hackaton.tasks',)
-

@@ -1,13 +1,10 @@
+import multiprocessing
+
 from apscheduler.schedulers.background import BackgroundScheduler
-
+from apscheduler.triggers.cron import CronTrigger
 import os
+
 from app import settings
-
-
-# @shared_task
-# def run_parser_task():
-#     os.chdir(BASE_DIR)
-#     call_command('python manage.py load_hackathon_data')
 
 
 # функция - задание
@@ -16,20 +13,22 @@ def run_scrapy_and_db_update():
     os.system('python manage.py load_hackathon_data')
     print('TASK EXECUTED')
 
-#тестовая таска
-# def prompt():
-#     print("Executing Task...")
-from apscheduler.triggers.cron import CronTrigger
+#создание нового процесса для выполнения асинхронно от основного процесса
+def run_scrapy_and_db_update_async():
+    process = multiprocessing.Process(target=run_scrapy_and_db_update)
+    process.start()
+    process.join()
+
 #планировкщик
 def setup_parser_scheduler():
     # Создает ФОНОВЫЙ планировщик
     scheduler = BackgroundScheduler()
     # планирование задания
-    # scheduler.add_job(run_scrapy_and_db_update, 'interval', seconds=30) #интервальный запуск
+    # scheduler.add_job(run_scrapy_and_db_update_async, 'interval', seconds=30) #интервальный запуск
 
     scheduler.add_job(
-        run_scrapy_and_db_update,
-        trigger=CronTrigger(hour=9, minute=50, second=0, timezone='Europe/Moscow')
+        run_scrapy_and_db_update_async,
+        trigger=CronTrigger(hour=2, minute=0, second=0, timezone='Europe/Moscow')
     ) #запуск в определенное время
 
     # Запуск запланированных заданий
