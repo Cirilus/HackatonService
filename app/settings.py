@@ -148,7 +148,7 @@ MEDIA_URL = env.str('MEDIA_URL', default='media/')
 STATIC_ROOT = 'static'
 STATIC_URL = env.str('STATIC_URL', default='static/')
 
-CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
+CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*', 'http://87.242.90.14/*', 'https://87.242.90.14/*']
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'TLD',
@@ -229,11 +229,3 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
     "django.contrib.auth.hashers.ScryptPasswordHasher",
 ]
-
-
-CELERY_TIMEZONE = 'Europe/Moscow'
-
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-
-CELERY_IMPORTS = ('Hackaton.tasks',)
-

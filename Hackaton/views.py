@@ -23,8 +23,11 @@ from drf_spectacular.types import OpenApiTypes
 from .paginations import HackatonListPagination, HackatonUserListPagination
 from .tasks import setup_parser_scheduler, run_scrapy_and_db_update
 
-setup_parser_scheduler() #запуск парсера хакатонов и добавления их в бд
 
+
+setup_parser_scheduler() #запуск парсера хакатонов и добавления их в бд самостоятельно (см в tasks)
+
+#эндпоинт для вызова парсера хакатонов вручную
 def testparser(request):
     # Логика представления
     run_scrapy_and_db_update()

@@ -4,8 +4,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import os
 
-from celery import shared_task
-
 from app import settings
 
 
@@ -15,6 +13,7 @@ def run_scrapy_and_db_update():
     os.system('python manage.py load_hackathon_data')
     print('TASK EXECUTED')
 
+#создание нового процесса для выполнения асинхронно от основного процесса
 def run_scrapy_and_db_update_async():
     process = multiprocessing.Process(target=run_scrapy_and_db_update)
     process.start()
@@ -29,7 +28,7 @@ def setup_parser_scheduler():
 
     scheduler.add_job(
         run_scrapy_and_db_update_async,
-        trigger=CronTrigger(hour=9, minute=50, second=0, timezone='Europe/Moscow')
+        trigger=CronTrigger(hour=2, minute=0, second=0, timezone='Europe/Moscow')
     ) #запуск в определенное время
 
     # Запуск запланированных заданий

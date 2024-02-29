@@ -20,7 +20,7 @@ urlpatterns = [
     path('get_locations/', HackatonListView.as_view({'get':'get_locations'})),
 
 
-    path('testparser/', testparser, name='testparser'), #инициализация парсинга хакатонов с сайта хакатоны рф
+    path('testparser/', testparser, name='testparser'), #эндпоинт для вызова парсера хакатонов вручную
 
 ]
 
