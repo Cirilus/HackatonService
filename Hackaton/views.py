@@ -31,7 +31,7 @@ setup_parser_scheduler() #запуск парсера хакатонов и до
 def testparser(request):
     # Логика представления
     run_scrapy_and_db_update()
-    return HttpResponse("Привет, мир!")
+    return HttpResponse("endpoint для запуска scrapy-parsera с сайта хакатоны.рф  и добавлления данных в бд")
 
 #регистрация пользователя на хакатон по id
 @extend_schema(tags=['Hackaton user'],)
