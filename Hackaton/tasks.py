@@ -28,7 +28,7 @@ def setup_parser_scheduler():
 
     scheduler.add_job(
         run_scrapy_and_db_update_async,
-        trigger=CronTrigger(hour=2, minute=0, second=0, timezone='Europe/Moscow')
+        trigger=CronTrigger(hour=8, minute=0, second=0, timezone='Europe/Moscow')
     ) #запуск в определенное время
 
     # Запуск запланированных заданий
