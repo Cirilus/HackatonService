@@ -39,7 +39,7 @@ urlpatterns = [
     path('api/v1/hackaton/', include('Hackaton.urls')),
     path('', include('Resume.urls')),
     path('', include('Score.urls')),
-    path('', include('recruto.urls')),
+
 ]
 
 
